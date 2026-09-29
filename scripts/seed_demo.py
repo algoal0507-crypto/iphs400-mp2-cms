@@ -23,6 +23,84 @@ from app import db  # noqa: E402
 DEMO_MANAGER_EMAIL = "manager@laoncemil.test"
 DEMO_EDITOR_EMAIL = "editor@laoncemil.test"
 
+# Sourced from notes/restaurant-research.md (Michelin Guide, retrieved
+# 2026-09-29). No verified phone number or photos exist yet, so both are
+# clearly labeled placeholders rather than invented facts.
+HOME_BODY = """\
+## Visit La Once Mil
+
+**Address:** Monte Everest 780, Lomas de Chapultepec, Miguel Hidalgo, CP 11000, \
+Mexico City
+
+**Hours:** Monday-Friday 12:00 PM-11:30 PM · Saturday-Sunday 11:00 AM-11:30 PM
+
+[Get directions](https://maps.google.com/?q=Monte+Everest+780+Lomas+de+Chapultepec+Ciudad+de+Mexico)
+
+[Call us](tel:+00000000000) — *[PLACEHOLDER: phone number not yet supplied]*
+
+Walk-ins only — no reservations, first come, first served.
+
+One MICHELIN Star, awarded 2026, attributed to this address.
+
+[PLACEHOLDER: storefront photo]
+"""
+
+MENU_BODY = """\
+## Menu
+
+Gourmet tacos elevating traditional street-taco formats. No prices are listed — \
+see `notes/restaurant-research.md`: no verified peso pricing exists yet.
+
+- **Carne asada** — grilled beef taco
+- **Arrachera** — skirt steak taco
+- **Picaña (trompo)** — top sirloin taco, cooked on the trompo
+- **A5 Wagyu** — hand-pressed tortilla, spicy soy salsa (signature dish)
+- **Lechón (carnitas)** — 12-hour cooked suckling pig
+- **Rib eye** — grilled rib eye taco
+- **Bass al pastor** — fish prepared al pastor style
+- **Vegan options** — available, ask your server
+- **Tostadas** — including tuna/ceviche
+- **Quesadillas**
+- **Noodle soup**
+- **Caesar salad**
+
+### Salsas
+
+From mild ("salsa cruda") to very spicy ("martajada," made with árbol and morita \
+chiles).
+
+### Desserts
+
+Sorbets, ice creams, and meringues.
+
+[PLACEHOLDER: menu photo]
+"""
+
+OUR_STORY_BODY = """\
+## Our Story
+
+La Once Mil is a taquería at Monte Everest 780 in Lomas de Chapultepec, Mexico \
+City, opened in 2024 by chef César de la Parra together with Enrique Glennie and \
+Jimena Gutiérrez. The name comes from 11000, the postal code of the neighborhood \
+where the restaurant began.
+
+In 2026, La Once Mil became the first — and so far only — taquería to receive a \
+Michelin star, awarded to this Lomas de Chapultepec address specifically.
+
+The idea behind the menu is simple: take the traditional street-taco format most \
+people know as fast, inexpensive food, and elevate it with high-quality \
+ingredients — from A5 wagyu to 12-hour-cooked lechón — while keeping the \
+counter-service, walk-in-only spirit of a real taquería.
+
+[PLACEHOLDER: chef/kitchen photo]
+"""
+
+PAGE_CONTENT = {
+    "home": HOME_BODY,
+    "menu": MENU_BODY,
+    "our-story": OUR_STORY_BODY,
+}
+
 
 def main() -> int:
     admin_pw = os.environ.get("CMS_ADMIN_PASSWORD")
@@ -45,7 +123,17 @@ def main() -> int:
     else:
         print(f"Demo Editor ({DEMO_EDITOR_EMAIL}) already exists.")
 
-    # TODO (later tickets): seed News drafts/published items and Pages.
+    manager = db.get_user_by_email(DEMO_MANAGER_EMAIL)
+    for slug, body_md in PAGE_CONTENT.items():
+        page = db.get_page_by_slug(slug)
+        if page is not None and not page["body_md"]:
+            db.update_page(
+                slug, title=db.PAGE_TITLES[slug], body_md=body_md,
+                status="published", author_id=manager["id"],
+            )
+            print(f"Seeded permanent page: {slug}")
+
+    # TODO (later tickets): seed News drafts/published items.
     return 0
 
 

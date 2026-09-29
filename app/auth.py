@@ -76,3 +76,29 @@ def csrf_is_valid(request: Request, submitted: str | None) -> bool:
     if not cookie_value or not submitted:
         return False
     return secrets.compare_digest(cookie_value, submitted)
+
+
+def current_user(request: Request):
+    """The active, logged-in user for this request, or None.
+
+    Imports app.db lazily — app.db imports this module at load time, so a
+    top-level import here would be circular.
+    """
+    from app import db
+
+    user_id = read_session(request)
+    if user_id is None:
+        return None
+    user = db.get_user_by_id(user_id)
+    if user is None or not user["active"]:
+        return None
+    return user
+
+
+def render_with_csrf(templates, request: Request, template_name: str, context: dict, *, status_code: int = 200):
+    token = new_csrf_token()
+    response = templates.TemplateResponse(
+        request, template_name, {**context, "csrf_token": token}, status_code=status_code
+    )
+    set_csrf_cookie(response, token)
+    return response

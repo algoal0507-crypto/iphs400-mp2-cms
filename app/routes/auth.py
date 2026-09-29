@@ -15,23 +15,11 @@ router = APIRouter()
 templates = Jinja2Templates(directory=str(settings.TEMPLATES))
 
 
-def _current_user(request: Request) -> db.sqlite3.Row | None:
-    user_id = auth.read_session(request)
-    if user_id is None:
-        return None
-    user = db.get_user_by_id(user_id)
-    if user is None or not user["active"]:
-        return None
-    return user
+_current_user = auth.current_user
 
 
 def _render_with_csrf(request: Request, template_name: str, context: dict, *, status_code: int = 200):
-    token = auth.new_csrf_token()
-    response = templates.TemplateResponse(
-        request, template_name, {**context, "csrf_token": token}, status_code=status_code
-    )
-    auth.set_csrf_cookie(response, token)
-    return response
+    return auth.render_with_csrf(templates, request, template_name, context, status_code=status_code)
 
 
 @router.get("/login")
