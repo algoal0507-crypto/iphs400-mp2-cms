@@ -14,6 +14,14 @@ from __future__ import annotations
 
 import os
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from app import db  # noqa: E402
+
+DEMO_MANAGER_EMAIL = "manager@laoncemil.test"
+DEMO_EDITOR_EMAIL = "editor@laoncemil.test"
 
 
 def main() -> int:
@@ -24,9 +32,20 @@ def main() -> int:
               "(copy .env.example).")
         return 1
 
-    # TODO (your tickets): create the users, then the demo content.
-    print("Nothing to seed yet: no content types exist. "
-          "Extend scripts/seed_demo.py as you build T01+.")
+    db.init_db()
+    if db.get_user_by_email(DEMO_MANAGER_EMAIL) is None:
+        db.create_user(DEMO_MANAGER_EMAIL, admin_pw, "admin")
+        print(f"Created Demo Manager ({DEMO_MANAGER_EMAIL}).")
+    else:
+        print(f"Demo Manager ({DEMO_MANAGER_EMAIL}) already exists.")
+
+    if db.get_user_by_email(DEMO_EDITOR_EMAIL) is None:
+        db.create_user(DEMO_EDITOR_EMAIL, editor_pw, "editor")
+        print(f"Created Demo Editor ({DEMO_EDITOR_EMAIL}).")
+    else:
+        print(f"Demo Editor ({DEMO_EDITOR_EMAIL}) already exists.")
+
+    # TODO (later tickets): seed News drafts/published items and Pages.
     return 0
 
 

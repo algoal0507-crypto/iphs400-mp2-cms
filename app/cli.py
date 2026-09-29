@@ -10,7 +10,7 @@ import argparse
 import subprocess
 import sys
 
-from app import settings
+from app import db, settings
 from app.publish import render_site
 
 
@@ -28,6 +28,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "serve":
         import uvicorn
 
+        db.init_db()
         uvicorn.run("app.main:app", port=args.port, reload=args.reload)
         return 0
 
