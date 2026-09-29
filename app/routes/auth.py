@@ -9,10 +9,10 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app import auth, db, settings
+from app import auth, db, settings, urls
 
 router = APIRouter()
-templates = Jinja2Templates(directory=str(settings.TEMPLATES))
+templates = urls.install(Jinja2Templates(directory=str(settings.TEMPLATES)))
 
 
 _current_user = auth.current_user

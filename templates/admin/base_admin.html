@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{#- Admin routes nest, so the shared layout's flat names ("style.css", "index.html")
+    would 404 here. rel() computes them from the request path (see app/urls.py). -#}
+{% block css_href %}{{ rel('/admin/style.css') }}{% endblock %}
+{% block home_href %}{{ rel('/admin/dashboard') }}{% endblock %}

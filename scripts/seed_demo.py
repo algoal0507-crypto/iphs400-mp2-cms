@@ -24,7 +24,7 @@ DEMO_MANAGER_EMAIL = "manager@laoncemil.test"
 DEMO_EDITOR_EMAIL = "editor@laoncemil.test"
 
 # Sourced from notes/restaurant-research.md (Michelin Guide, retrieved
-# 2026-09-29). No verified phone number or photos exist yet, so both are
+# 2026-09-29). No verified phone number exists, so none is shown; photos are
 # clearly labeled placeholders rather than invented facts.
 HOME_BODY = """\
 ## Visit La Once Mil
@@ -35,8 +35,6 @@ Mexico City
 **Hours:** Monday-Friday 12:00 PM-11:30 PM · Saturday-Sunday 11:00 AM-11:30 PM
 
 [Get directions](https://maps.google.com/?q=Monte+Everest+780+Lomas+de+Chapultepec+Ciudad+de+Mexico)
-
-[Call us](tel:+00000000000) — *[PLACEHOLDER: phone number not yet supplied]*
 
 Walk-ins only — no reservations, first come, first served.
 

@@ -10,11 +10,12 @@ them here. Keep this file small.
 from __future__ import annotations
 
 from fastapi import FastAPI, Request
+from fastapi.responses import Response
 from fastapi.templating import Jinja2Templates
 
-from app import settings
+from app import publish, settings, urls
 
-templates = Jinja2Templates(directory=str(settings.TEMPLATES))
+templates = urls.install(Jinja2Templates(directory=str(settings.TEMPLATES)))
 
 
 def create_app() -> FastAPI:
@@ -25,6 +26,11 @@ def create_app() -> FastAPI:
         return templates.TemplateResponse(
             request, "admin/hello.html", {"title": "Admin"}
         )
+
+    @app.get("/admin/style.css")
+    def admin_stylesheet():
+        # Same stylesheet the exported site ships; admin pages link it relatively.
+        return Response(publish.CSS, media_type="text/css")
 
     @app.get("/")
     def public_home(request: Request):

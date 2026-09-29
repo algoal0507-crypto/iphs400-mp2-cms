@@ -1,9 +1,9 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 {% block content %}
   <h1>Welcome, {{ role_label }}</h1>
   <p>Signed in as {{ email }}.</p>
   {% if role_label == "Manager" %}
-    <p><a href="/admin/pages">Edit permanent pages (Home, Menu, Our Story)</a></p>
+    <p><a href="{{ rel('/admin/pages') }}">Edit permanent pages (Home, Menu, Our Story)</a></p>
   {% endif %}
   <form method="post" action="/logout">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">

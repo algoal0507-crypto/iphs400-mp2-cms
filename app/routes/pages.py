@@ -15,10 +15,10 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app import auth, content, db, settings
+from app import auth, content, db, settings, urls
 
 router = APIRouter()
-templates = Jinja2Templates(directory=str(settings.TEMPLATES))
+templates = urls.install(Jinja2Templates(directory=str(settings.TEMPLATES)))
 
 
 def _require_manager(request: Request):
