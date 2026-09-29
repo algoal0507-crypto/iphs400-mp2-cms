@@ -72,7 +72,7 @@ posted it.
   that was not an intentional name choice. See `notes/restaurant-research.md`.)
 - **Publishing is admin-only.** Only the manager/admin role can publish content live;
   the demo editor can create and edit announcement drafts but cannot publish, cannot
-  edit permanent pages (Home, Menu, Our Story), and cannot manage users. The
+  reach Pages at all (create, edit, or delete), and cannot manage users. The
   admin can do everything. This is a class prototype modeling a hypothetical future
   hire, not real restaurant staff.
 - **Demo accounts are fictional, not the real owner.** Seed users are named
@@ -120,9 +120,13 @@ article images, and not AI-generated or stock substitutes.
   directions link, and a prominent Call button live on Home itself. There is **no
   separate Visit Us page**; the earlier assumption elsewhere in this brief of a
   standalone Visit Us/Hours page is superseded by this decision.
-- **Permanent pages are Home, Menu, and Our Story.** Only the admin can edit them.
-  **News** is the list of published posts (the "Posts" capability), which the editor
-  can draft and the admin can publish.
+- **Pages start as Home, Menu, and Our Story**, seeded by `scripts/seed_demo.py`.
+  Only the admin can create, edit, or delete a Page — matching the MP2 rubric's
+  "Pages: same fields and operations as posts," so this is initial content, not a
+  fixed ceiling (corrected 2026-09-29; an earlier version of this brief called the
+  three "permanent" in a way that implied no others could ever be added — see the
+  comment on spec issue #1). **News** is the list of published posts (the "Posts"
+  capability), which the editor can draft and the admin can publish.
 - **Publishing marks content published in the local CMS only.** The public GitHub
   Pages site does not update automatically — it reflects the new state only after
   `cms publish` exports to `site/` and that export is deployed to Pages. "Published"

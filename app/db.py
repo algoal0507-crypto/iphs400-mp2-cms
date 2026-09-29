@@ -19,7 +19,7 @@ from app import auth, settings
 PAGE_SLUGS = ("home", "menu", "our-story")
 PAGE_TITLES = {"home": "Home", "menu": "Menu", "our-story": "Our Story"}
 
-SCHEMA = """
+USERS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL UNIQUE,
@@ -27,7 +27,9 @@ CREATE TABLE IF NOT EXISTS users (
     role TEXT NOT NULL CHECK (role IN ('admin', 'editor')),
     active INTEGER NOT NULL DEFAULT 1
 );
+"""
 
+PAGES_SCHEMA = """
 CREATE TABLE IF NOT EXISTS pages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     slug TEXT NOT NULL UNIQUE,
@@ -40,7 +42,51 @@ CREATE TABLE IF NOT EXISTS pages (
 );
 """
 
+SCHEMA = USERS_SCHEMA + PAGES_SCHEMA
+
 SLUG_PATTERN = "^[a-z0-9]+(-[a-z0-9]+)*$"
+
+_PAGE_COLUMNS = "id, slug, title, body_md, status, author_id, created_at, updated_at"
+
+
+def _migrate_legacy_page_slug_check(conn: sqlite3.Connection, existing_pages_sql: str | None) -> None:
+    """A database created before Pages supported full CRUD has
+    `CHECK (slug IN ('home', 'menu', 'our-story'))` baked into the `pages`
+    table — `CREATE TABLE IF NOT EXISTS` never touches an existing table, so
+    that CHECK would otherwise survive forever and silently block creating
+    any other page. Rebuild the table from PAGES_SCHEMA, keeping every row.
+
+    This runs as one explicit transaction (isolation_level=None plus our own
+    BEGIN/COMMIT) rather than relying on the connection's default autocommit
+    handling or `executescript()`: `executescript()` implicitly commits
+    pending work before it runs, and under the default isolation level a DDL
+    statement like ALTER/CREATE/DROP TABLE can commit independently of a
+    later `conn.commit()`. Either would let a crash between steps (process
+    killed, power loss) orphan the renamed table with real content in it
+    while the app reads a freshly emptied `pages` table — confirmed with a
+    crash simulation (kill before the final commit, reopen, check for data
+    loss) before writing it this way.
+    """
+    if existing_pages_sql is None or "CHECK (slug IN" not in existing_pages_sql:
+        return
+
+    previous_isolation_level = conn.isolation_level
+    conn.isolation_level = None
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute("ALTER TABLE pages RENAME TO pages_legacy")
+        conn.execute(PAGES_SCHEMA)
+        conn.execute(
+            f"INSERT INTO pages ({_PAGE_COLUMNS}) "
+            f"SELECT {_PAGE_COLUMNS} FROM pages_legacy"
+        )
+        conn.execute("DROP TABLE pages_legacy")
+        conn.execute("COMMIT")
+    except Exception:
+        conn.execute("ROLLBACK")
+        raise
+    finally:
+        conn.isolation_level = previous_isolation_level
 
 
 def get_connection(path: Path | None = None) -> sqlite3.Connection:
@@ -50,15 +96,21 @@ def get_connection(path: Path | None = None) -> sqlite3.Connection:
 
 
 def init_db(path: Path | None = None) -> None:
-    """Create the schema and, only on a brand-new database, seed the
-    starting Pages. Pages are freely creatable/deletable (see PAGE_SLUGS'
-    docstring), so this must not resurrect a page the Manager deleted —
-    it only bootstraps an empty table, never re-inserts into a populated one.
+    """Create the schema and, only the first time the `pages` table is
+    created, seed the starting Pages. Pages are freely creatable/deletable
+    (see PAGE_SLUGS' docstring) and `init_db` runs again on every `cms serve`
+    restart, so this keys off whether the table already existed — not
+    whether it's currently empty — or deleting every page would make the
+    next restart look identical to a brand-new database and recreate them.
     """
     conn = get_connection(path)
     try:
+        existing_pages_row = conn.execute(
+            "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'pages'"
+        ).fetchone()
         conn.executescript(SCHEMA)
-        if conn.execute("SELECT COUNT(*) FROM pages").fetchone()[0] == 0:
+        _migrate_legacy_page_slug_check(conn, existing_pages_row[0] if existing_pages_row else None)
+        if existing_pages_row is None:
             for slug in PAGE_SLUGS:
                 conn.execute(
                     "INSERT INTO pages (slug, title) VALUES (?, ?)",

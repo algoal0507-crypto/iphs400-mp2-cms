@@ -8,6 +8,8 @@ redirected to login, and Markdown sanitization of a script/onerror payload.
 """
 from __future__ import annotations
 
+import sqlite3
+
 from app import db
 
 
@@ -198,3 +200,125 @@ def test_anonymous_is_redirected_from_create_and_delete(client):
     response = client.post("/admin/pages/home/delete", data={}, follow_redirects=False)
     assert response.status_code == 303
     assert response.headers["location"].endswith("/login")
+
+
+def test_deleting_all_pages_then_restarting_does_not_recreate_them():
+    """Regression: init_db() runs again on every `cms serve` restart. It must
+    only bootstrap an empty table, never resurrect a page the Manager deleted."""
+    for slug in db.PAGE_SLUGS:
+        db.delete_page(slug)
+    assert db.list_pages() == []
+
+    db.init_db()  # simulates the next `cms serve` restart
+
+    assert db.list_pages() == []
+
+
+def test_existing_database_migrates_off_the_legacy_slug_check(tmp_path):
+    """A database created before Pages supported full CRUD has
+    CHECK (slug IN (...)) baked into the pages table. init_db() must rebuild
+    that table (keeping existing content) so create_page() isn't silently
+    blocked for any slug outside the old fixed three."""
+    legacy_path = tmp_path / "legacy.db"
+    conn = sqlite3.connect(legacy_path)
+    conn.executescript("""
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN ('admin', 'editor')),
+            active INTEGER NOT NULL DEFAULT 1
+        );
+        CREATE TABLE pages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            slug TEXT NOT NULL UNIQUE CHECK (slug IN ('home', 'menu', 'our-story')),
+            title TEXT NOT NULL,
+            body_md TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL CHECK (status IN ('draft', 'published')) DEFAULT 'draft',
+            author_id INTEGER REFERENCES users(id),
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+    """)
+    conn.execute(
+        "INSERT INTO pages (slug, title, body_md, status) "
+        "VALUES ('home', 'Home', 'Existing verified content', 'published')"
+    )
+    conn.commit()
+    conn.close()
+
+    db.init_db(legacy_path)
+
+    conn = sqlite3.connect(legacy_path)
+    conn.row_factory = sqlite3.Row
+    home = conn.execute("SELECT * FROM pages WHERE slug = 'home'").fetchone()
+    assert home["body_md"] == "Existing verified content"
+    assert home["status"] == "published"
+
+    # Would raise sqlite3.IntegrityError under the old CHECK constraint.
+    conn.execute(
+        "INSERT INTO pages (slug, title, body_md, status) VALUES ('events', 'Events', 'x', 'draft')"
+    )
+    conn.commit()
+    assert conn.execute("SELECT slug FROM pages WHERE slug = 'events'").fetchone() is not None
+    conn.close()
+
+
+def _legacy_schema_sql():
+    return """
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN ('admin', 'editor')),
+            active INTEGER NOT NULL DEFAULT 1
+        );
+        CREATE TABLE pages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            slug TEXT NOT NULL UNIQUE CHECK (slug IN ('home', 'menu', 'our-story')),
+            title TEXT NOT NULL,
+            body_md TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL CHECK (status IN ('draft', 'published')) DEFAULT 'draft',
+            author_id INTEGER REFERENCES users(id),
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+    """
+
+
+def test_legacy_migration_is_atomic_against_a_mid_migration_crash(tmp_path):
+    """Regression: a process killed between the migration's steps (crash, OOM,
+    power loss, before any COMMIT) must not orphan the renamed table's real
+    content while the app is left reading a freshly emptied `pages` table."""
+    legacy_path = tmp_path / "legacy.db"
+    conn = sqlite3.connect(legacy_path)
+    conn.executescript(_legacy_schema_sql())
+    conn.execute(
+        "INSERT INTO pages (slug, title, body_md, status) "
+        "VALUES ('home', 'Home', 'Existing verified content', 'published')"
+    )
+    conn.commit()
+
+    existing_pages_sql = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'pages'"
+    ).fetchone()[0]
+
+    # Reproduce the migration's steps up to (not including) its final COMMIT,
+    # then simulate a crash by closing the connection without committing.
+    conn.isolation_level = None
+    conn.execute("BEGIN IMMEDIATE")
+    conn.execute("ALTER TABLE pages RENAME TO pages_legacy")
+    conn.execute(db.PAGES_SCHEMA)
+    conn.execute(
+        f"INSERT INTO pages ({db._PAGE_COLUMNS}) SELECT {db._PAGE_COLUMNS} FROM pages_legacy"
+    )
+    conn.execute("DROP TABLE pages_legacy")
+    conn.close()  # crash: no COMMIT
+
+    reopened = sqlite3.connect(legacy_path)
+    reopened.row_factory = sqlite3.Row
+    home = reopened.execute("SELECT * FROM pages WHERE slug = 'home'").fetchone()
+    assert home is not None, "the original row must survive an uncommitted crash"
+    assert home["body_md"] == "Existing verified content"
+    assert "CHECK (slug IN" in existing_pages_sql  # sanity check on the fixture itself
+    reopened.close()
