@@ -5,21 +5,21 @@ there is no ORM here.
 """
 from __future__ import annotations
 
+import re
 import sqlite3
 from pathlib import Path
 
 from app import auth, settings
 
-# The Manager edits these three fixed permanent pages; nothing ever creates or
-# deletes a row here (see CONTEXT.md's "Permanent pages" entry). This tuple is
-# the single source of truth — the schema's CHECK constraint is generated
-# from it below, so the two can't drift apart.
+# La Once Mil's initial Pages (see notes/restaurant-research.md); this is
+# seed content, not a limit. Per the MP2 rubric/manual ("Pages: same fields
+# and operations as posts, plus public navigation"), Pages support full
+# create/read/update/delete like Posts — the Manager can add or remove pages
+# beyond this starting set.
 PAGE_SLUGS = ("home", "menu", "our-story")
 PAGE_TITLES = {"home": "Home", "menu": "Menu", "our-story": "Our Story"}
 
-_PAGE_SLUGS_SQL = ", ".join(f"'{slug}'" for slug in PAGE_SLUGS)
-
-SCHEMA = f"""
+SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL UNIQUE,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS pages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    slug TEXT NOT NULL UNIQUE CHECK (slug IN ({_PAGE_SLUGS_SQL})),
+    slug TEXT NOT NULL UNIQUE,
     title TEXT NOT NULL,
     body_md TEXT NOT NULL DEFAULT '',
     status TEXT NOT NULL CHECK (status IN ('draft', 'published')) DEFAULT 'draft',
@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS pages (
 );
 """
 
+SLUG_PATTERN = "^[a-z0-9]+(-[a-z0-9]+)*$"
+
 
 def get_connection(path: Path | None = None) -> sqlite3.Connection:
     conn = sqlite3.connect(path or settings.DATABASE_PATH)
@@ -48,14 +50,20 @@ def get_connection(path: Path | None = None) -> sqlite3.Connection:
 
 
 def init_db(path: Path | None = None) -> None:
+    """Create the schema and, only on a brand-new database, seed the
+    starting Pages. Pages are freely creatable/deletable (see PAGE_SLUGS'
+    docstring), so this must not resurrect a page the Manager deleted —
+    it only bootstraps an empty table, never re-inserts into a populated one.
+    """
     conn = get_connection(path)
     try:
         conn.executescript(SCHEMA)
-        for slug in PAGE_SLUGS:
-            conn.execute(
-                "INSERT OR IGNORE INTO pages (slug, title) VALUES (?, ?)",
-                (slug, PAGE_TITLES[slug]),
-            )
+        if conn.execute("SELECT COUNT(*) FROM pages").fetchone()[0] == 0:
+            for slug in PAGE_SLUGS:
+                conn.execute(
+                    "INSERT INTO pages (slug, title) VALUES (?, ?)",
+                    (slug, PAGE_TITLES[slug]),
+                )
         conn.commit()
     finally:
         conn.close()
@@ -132,6 +140,35 @@ def update_page(slug: str, *, title: str, body_md: str, status: str, author_id: 
                WHERE slug = ?""",
             (title, body_md, status, author_id, slug),
         )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def slug_is_valid(slug: str) -> bool:
+    return re.fullmatch(SLUG_PATTERN, slug) is not None
+
+
+def create_page(slug: str, *, title: str, body_md: str, status: str, author_id: int) -> bool:
+    """Insert a new page. Returns False if the slug is already taken."""
+    conn = get_connection()
+    try:
+        conn.execute(
+            "INSERT INTO pages (slug, title, body_md, status, author_id) VALUES (?, ?, ?, ?, ?)",
+            (slug, title, body_md, status, author_id),
+        )
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+
+def delete_page(slug: str) -> None:
+    conn = get_connection()
+    try:
+        conn.execute("DELETE FROM pages WHERE slug = ?", (slug,))
         conn.commit()
     finally:
         conn.close()

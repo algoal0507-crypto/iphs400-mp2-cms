@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>Pages</h1>
+  <p><a href="/admin/pages/new">+ New page</a></p>
   <ul>
     {% for page in pages %}
       <li>
         <a href="/admin/pages/{{ page['slug'] }}">{{ page['title'] }}</a>
         — {{ page['status'] }}
+        <form method="post" action="/admin/pages/{{ page['slug'] }}/delete" style="display:inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit">Delete</button>
+        </form>
       </li>
     {% endfor %}
   </ul>

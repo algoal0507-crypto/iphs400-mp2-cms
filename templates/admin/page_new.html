@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>New page</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post" action="/admin/pages/new">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Slug <input type="text" name="slug" value="{{ values['slug'] }}" pattern="[a-z0-9]+(-[a-z0-9]+)*" required></label>
+    <label>Title <input type="text" name="title" value="{{ values['title'] }}" required></label>
+    <label>Body (Markdown)
+      <textarea name="body_md" rows="16" cols="80">{{ values['body_md'] }}</textarea>
+    </label>
+    <label>Status
+      <select name="status">
+        <option value="draft" {% if values['status'] == 'draft' %}selected{% endif %}>Draft</option>
+        <option value="published" {% if values['status'] == 'published' %}selected{% endif %}>Published</option>
+      </select>
+    </label>
+    <button type="submit">Create</button>
+  </form>
+{% endblock %}
