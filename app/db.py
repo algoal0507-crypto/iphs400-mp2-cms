@@ -46,6 +46,11 @@ SCHEMA = USERS_SCHEMA + PAGES_SCHEMA
 
 SLUG_PATTERN = "^[a-z0-9]+(-[a-z0-9]+)*$"
 
+# "index" is reserved: app/publish.py exports the "home" page to index.html,
+# so a page slugged "index" would silently overwrite the real homepage on
+# export.
+_RESERVED_SLUGS = frozenset({"index"})
+
 _PAGE_COLUMNS = "id, slug, title, body_md, status, author_id, created_at, updated_at"
 
 
@@ -198,7 +203,7 @@ def update_page(slug: str, *, title: str, body_md: str, status: str, author_id: 
 
 
 def slug_is_valid(slug: str) -> bool:
-    return re.fullmatch(SLUG_PATTERN, slug) is not None
+    return slug not in _RESERVED_SLUGS and re.fullmatch(SLUG_PATTERN, slug) is not None
 
 
 def create_page(slug: str, *, title: str, body_md: str, status: str, author_id: int) -> bool:
