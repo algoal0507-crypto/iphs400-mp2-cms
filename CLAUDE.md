@@ -36,3 +36,13 @@ admin console never goes on the public internet.
   starts `T0N:` and ends `Closes #N`.
 - Ask before adding a dependency. The stack in `pyproject.toml` is fixed for this
   project.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub Issues on `algoal0507-crypto/iphs400-mp2-cms` (via `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout: `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/domain.md`.
