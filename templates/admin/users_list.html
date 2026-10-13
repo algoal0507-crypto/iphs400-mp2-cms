@@ -2,29 +2,29 @@
 {% block content %}
   <h1>Users</h1>
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
-  <p><a href="{{ rel('/admin/users/new') }}">+ New user</a></p>
-  <ul>
+  <p><a class="btn" href="{{ rel('/admin/users/new') }}">New user</a></p>
+  <ul class="rows">
     {% for u in users %}
       <li data-user="{{ u['email'] }}">
-        {{ u['email'] }} — {{ 'Manager' if u['role'] == 'admin' else 'Editor' }},
-        {{ 'active' if u['active'] else 'deactivated' }}
+        <span class="grow">{{ u['email'] }} <span class="meta">{{ 'Manager' if u['role'] == 'admin' else 'Editor' }}</span></span>
+        <span class="badge badge-{{ 'active' if u['active'] else 'deactivated' }}">{{ 'active' if u['active'] else 'deactivated' }}</span>
         {% if u['id'] == me['id'] %}
-          (you)
+          <span class="meta">(you)</span>
         {% else %}
-          <form method="post" action="/admin/users/{{ u['id'] }}/role" style="display:inline">
+          <form method="post" action="/admin/users/{{ u['id'] }}/role">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <select name="role" aria-label="Role for {{ u['email'] }}">
               {% for r in roles %}
                 <option value="{{ r }}" {% if u['role'] == r %}selected{% endif %}>{{ 'Manager' if r == 'admin' else 'Editor' }}</option>
               {% endfor %}
             </select>
-            <button type="submit">Change role</button>
+            <button type="submit" class="btn btn-secondary btn-small">Change role</button>
           </form>
           {% if u['active'] %}
-            <form method="post" action="/admin/users/{{ u['id'] }}/deactivate" style="display:inline"
+            <form method="post" action="/admin/users/{{ u['id'] }}/deactivate"
                   onsubmit="return confirm('Deactivate this user? They lose access immediately.')">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-              <button type="submit">Deactivate</button>
+              <button type="submit" class="btn btn-danger btn-small">Deactivate</button>
             </form>
           {% endif %}
         {% endif %}

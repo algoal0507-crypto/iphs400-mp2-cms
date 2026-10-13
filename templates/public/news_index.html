@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block title %}News — {{ title }}{% endblock %}
 {% block content %}
-  <h1>News</h1>
-  {% if posts %}
-    <ul>
-      {% for post in posts %}
-        <li><a href="{{ post.href }}">{{ post.title }}</a> <small>{{ post.date }}</small></li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No news yet.</p>
-  {% endif %}
+  <section class="page">
+    <h1>News</h1>
+    {% if posts %}
+      <ul class="post-list">
+        {% for post in posts %}
+          <li><time datetime="{{ post.date }}">{{ post.date }}</time> <a href="{{ post.href }}">{{ post.title }}</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No news yet.</p>
+    {% endif %}
+  </section>
 {% endblock %}

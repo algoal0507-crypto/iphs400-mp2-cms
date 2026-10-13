@@ -18,6 +18,7 @@ without tracking directory depth.
 """
 from __future__ import annotations
 
+import re
 import shutil
 from pathlib import Path
 
@@ -25,13 +26,26 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app import content, db, settings
 
-CSS = """/* Minimal starter styles — make them yours. */
-:root { color-scheme: light dark; }
-body { font: 16px/1.6 system-ui, sans-serif; margin: 0 auto; max-width: 42rem; padding: 1rem; }
-header a { font-weight: 700; text-decoration: none; }
-header nav ul { display: flex; gap: 1rem; list-style: none; padding: 0; margin: 0.5rem 0 0; }
-main { margin-block: 2rem; }
-"""
+CSS = (settings.TEMPLATES / "style.css").read_text()
+
+# One line under each entry point on Home. Pages the Manager adds later simply
+# show no line.
+BLURBS = {
+    "menu.html": "Tacos, salsas, and desserts.",
+    "our-story.html": "From a postal code to a Michelin star.",
+    "news.html": "Announcements and updates.",
+}
+
+_PLACEHOLDER = re.compile(r"<p>\[(PLACEHOLDER: [^\]<]+)\]</p>")
+
+
+def mark_placeholders(html: str) -> str:
+    """Show "[PLACEHOLDER: ...]" lines as a labelled photo-shaped block.
+
+    Runs on already-sanitized HTML and only re-wraps text that was in it.
+    """
+    return _PLACEHOLDER.sub(r'<figure class="placeholder"><figcaption>\1</figcaption></figure>', html)
+
 
 HOME_SLUG = "home"
 NEWS_INDEX_FILE = f"{db.NEWS_INDEX_SLUG}.html"
@@ -74,24 +88,28 @@ def render_site(out: Path | None = None) -> Path:
         {"href": _out_name(p["slug"]), "title": p["title"]}
         for p in published if p["slug"] != HOME_SLUG
     ] + [{"href": NEWS_INDEX_FILE, "title": "News"}]
+    for link in nav_links:
+        link["blurb"] = BLURBS.get(link["href"])
     layout = {
         "title": settings.SITE_TITLE, "css_path": "style.css",
         "home_path": "index.html", "nav_links": nav_links,
     }
 
-    template = env.get_template("public/page.html")
+    page_template = env.get_template("public/page.html")
+    home_template = env.get_template("public/home_page.html")
 
-    def write_item(filename: str, item) -> None:
+    def write_item(filename: str, item, template=page_template) -> None:
         (out / filename).write_text(
             template.render(
                 page_title=item["title"],
-                body_html=content.render_markdown(item["body_md"]),
+                body_html=mark_placeholders(content.render_markdown(item["body_md"])),
                 **layout,
             )
         )
 
     for page in published:
-        write_item(_out_name(page["slug"]), page)
+        write_item(_out_name(page["slug"]), page,
+                   home_template if page["slug"] == HOME_SLUG else page_template)
     for post in posts:
         write_item(f"{db.NEWS_PREFIX}{post['slug']}.html", post)
 

@@ -1,28 +1,45 @@
 {% extends "admin/base_admin.html" %}
 {% block content %}
   <h1>Welcome, {{ role_label }}</h1>
-  <p>Signed in as {{ email }}.</p>
-  <h2>News</h2>
-  <p>
-    <span data-count="news-draft">{{ news_counts['draft'] }}</span> draft,
-    <span data-count="news-published">{{ news_counts['published'] }}</span> published
-  </p>
-  {% if pages is not none %}
-    <h2>Pages</h2>
-    <ul>
-      {% for page in pages %}
-        <li data-page="{{ page['slug'] }}">{{ page['title'] }} — {{ page['status'] }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-  <p><a href="{{ rel('/admin/content') }}">All content</a></p>
-  {% if role_label == "Manager" %}
-    <p><a href="{{ rel('/admin/users') }}">Manage users</a></p>
-    <p><a href="{{ rel('/admin/pages') }}">Edit permanent pages (Home, Menu, Our Story)</a></p>
-  {% endif %}
-  <p><a href="{{ rel('/admin/posts') }}">News posts</a></p>
-  <form method="post" action="/logout">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit">Log out</button>
-  </form>
+  <p class="lede">Signed in as {{ email }}.</p>
+
+  <div class="cards">
+    <section class="card">
+      <h2>News</h2>
+      <div class="stats">
+        <div><span class="stat" data-count="news-draft">{{ news_counts['draft'] }}</span><span class="stat-label">draft</span></div>
+        <div><span class="stat" data-count="news-published">{{ news_counts['published'] }}</span><span class="stat-label">published</span></div>
+      </div>
+      <p class="actions">
+        <a class="btn btn-small" href="{{ rel('/admin/posts/new') }}">New post</a>
+        <a class="btn btn-secondary btn-small" href="{{ rel('/admin/posts') }}">News posts</a>
+      </p>
+    </section>
+
+    {% if pages is not none %}
+    <section class="card">
+      <h2>Pages</h2>
+      <ul>
+        {% for page in pages %}
+          <li data-page="{{ page['slug'] }}"><span>{{ page['title'] }}</span> <span class="badge badge-{{ page['status'] }}">{{ page['status'] }}</span></li>
+        {% endfor %}
+      </ul>
+      <p class="actions"><a class="btn btn-secondary btn-small" href="{{ rel('/admin/pages') }}">Edit pages</a></p>
+    </section>
+    {% endif %}
+
+    <section class="card">
+      <h2>Everything</h2>
+      <p>Filter all News{% if pages is not none %} and Pages{% endif %} by status.</p>
+      <p class="actions"><a class="btn btn-secondary btn-small" href="{{ rel('/admin/content') }}">All content</a></p>
+    </section>
+
+    {% if role_label == "Manager" %}
+    <section class="card">
+      <h2>People</h2>
+      <p>Add people, change roles, or remove access.</p>
+      <p class="actions"><a class="btn btn-secondary btn-small" href="{{ rel('/admin/users') }}">Manage users</a></p>
+    </section>
+    {% endif %}
+  </div>
 {% endblock %}

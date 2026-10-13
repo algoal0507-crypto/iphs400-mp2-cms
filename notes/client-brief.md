@@ -101,12 +101,19 @@ posted it.
 
 ## Image tracker (placeholders in use until these are supplied)
 
+Status as of T09 (2026-10-13): **no photo is cleared, so none is on the site.** Pages show
+a labelled placeholder block instead (the `[PLACEHOLDER: ...]` line in the page's Markdown is
+rendered as a dashed photo-shaped box). Nothing is generated or taken from stock.
+
 | Needed for | Status | Notes |
 |---|---|---|
-| Homepage hero image | Placeholder | Storefront or signature dish shot, Lomas de Chapultepec location only |
-| Menu page image(s) | Placeholder | Food shots; no prices, per pricing caveat |
-| Our Story image | Placeholder | Chef/kitchen or storefront shot |
-| News/announcement images (optional, per post) | Placeholder | Only if a specific post needs one |
+| Homepage hero image | **Missing** | Storefront or signature dish shot, Lomas de Chapultepec location only. Candidate: Michelin article ribeye taco / sidewalk seating (not cleared, see below). Needs user's own Instagram pull or photo. |
+| Menu page image(s) | **Missing** | Food shots; no prices, per pricing caveat. Candidate: Michelin article wagyu taco (not cleared). |
+| Our Story image | **Missing** | Chef/kitchen or storefront shot. No candidate found. |
+| News/announcement images (optional, per post) | Not needed yet | Only if a specific post needs one |
+
+When a photo arrives, record here: file, post URL and date, caption/credit, what it shows,
+and that it is the Lomas de Chapultepec location.
 
 Per `notes/restaurant-research.md`: the three photos found in the Michelin article are
 credited "© La Once Mil" (editorial credit, not a republishing license) and are **not

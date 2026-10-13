@@ -9,15 +9,15 @@
       They have not been changed or deleted.
     </p>
   {% endif %}
-  <p><a href="{{ rel('/admin/pages/new') }}">+ New page</a></p>
-  <ul>
+  <p><a class="btn" href="{{ rel('/admin/pages/new') }}">New page</a></p>
+  <ul class="rows">
     {% for page in pages %}
       <li>
-        <a href="{{ rel('/admin/pages/' ~ page['slug']) }}">{{ page['title'] }}</a>
-        — {{ page['status'] }}
-        <form method="post" action="/admin/pages/{{ page['slug'] }}/delete" style="display:inline">
+        <a class="grow" href="{{ rel('/admin/pages/' ~ page['slug']) }}">{{ page['title'] }}</a>
+        <span class="badge badge-{{ page['status'] }}">{{ page['status'] }}</span>
+        <form method="post" action="/admin/pages/{{ page['slug'] }}/delete">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit">Delete</button>
+          <button type="submit" class="btn btn-danger btn-small">Delete</button>
         </form>
       </li>
     {% endfor %}

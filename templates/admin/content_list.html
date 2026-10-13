@@ -1,7 +1,7 @@
 {% extends "admin/base_admin.html" %}
 {% block content %}
   <h1>Content</h1>
-  <form method="get" action="{{ rel('/admin/content') }}">
+  <form class="filters" method="get" action="{{ rel('/admin/content') }}">
     {% if is_manager %}
       <label>Type
         <select name="type">
@@ -18,13 +18,14 @@
         <option value="published" {% if status == 'published' %}selected{% endif %}>Published</option>
       </select>
     </label>
-    <button type="submit">Filter</button>
+    <button type="submit" class="btn">Filter</button>
   </form>
-  <ul>
+  <ul class="rows">
     {% for row in rows %}
       <li data-row="{{ row.kind }}:{{ row.slug }}">
-        {% if row.can_open %}<a href="{{ rel(row.href) }}">{{ row.title }}</a>{% else %}{{ row.title }}{% endif %}
-        — {{ 'News' if row.kind == 'post' else 'Page' }}, {{ row.status }}
+        <span class="grow">{% if row.can_open %}<a href="{{ rel(row.href) }}">{{ row.title }}</a>{% else %}{{ row.title }}{% endif %}</span>
+        <span class="meta">{{ 'News' if row.kind == 'post' else 'Page' }}</span>
+        <span class="badge badge-{{ row.status }}">{{ row.status }}</span>
       </li>
     {% else %}
       <li>Nothing matches these filters.</li>

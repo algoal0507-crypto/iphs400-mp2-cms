@@ -54,8 +54,9 @@ def test_manager_dashboard_counts_news_and_page_status(client_as):
     html = admin.get("/admin/dashboard").text
     assert _count(html, "news-draft") == 2
     assert _count(html, "news-published") == 1
-    assert re.search(r'data-page="home"[^>]*>[^<]*published', html)
-    assert re.search(r'data-page="menu"[^>]*>[^<]*draft', html)
+    # The status sits in a badge inside the row, so read to the end of the row.
+    assert re.search(r'data-page="home"[^>]*>(?:(?!</li>).)*published', html, re.S)
+    assert re.search(r'data-page="menu"[^>]*>(?:(?!</li>).)*draft', html, re.S)
     assert 'data-page="our-story"' in html
 
 

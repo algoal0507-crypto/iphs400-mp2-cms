@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{#- The Home page. The hero is fixed; the visiting information is the Home page's own
+    Markdown (address, hours, directions), shown right under it; the entry points are
+    the same pages the navigation links to. -#}
+{% block title %}{{ page_title }} — {{ title }}{% endblock %}
+{% block content %}
+  <section class="hero">
+    <p class="eyebrow">Lomas de Chapultepec · Mexico City</p>
+    <h1>{{ title }}</h1>
+    <p class="lede">A Michelin-starred taquería. Walk in, no reservations: first come, first served.</p>
+    <hr class="rule">
+  </section>
+
+  <section class="visit">{{ body_html | safe }}</section>
+
+  {% if nav_links %}
+  <section class="entry-points" aria-labelledby="explore">
+    <h2 id="explore">Explore</h2>
+    <ul>
+      {% for link in nav_links %}
+        <li>
+          <a class="entry" href="{{ link.href }}">
+            <h3>{{ link.title }}</h3>
+            {% if link.blurb %}<p>{{ link.blurb }}</p>{% endif %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+{% endblock %}

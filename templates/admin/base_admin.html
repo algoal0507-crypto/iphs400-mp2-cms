@@ -1,5 +1,35 @@
 {% extends "base.html" %}
 {#- Admin routes nest, so the shared layout's flat names ("style.css", "index.html")
-    would 404 here. rel() computes them from the request path (see app/urls.py). -#}
+    would 404 here. rel() computes them from the request path (see app/urls.py).
+    The header is one nav for every admin screen; Manager-only links are left out
+    for the Editor (the routes enforce it too). -#}
 {% block css_href %}{{ rel('/admin/style.css') }}{% endblock %}
-{% block home_href %}{{ rel('/admin/dashboard') }}{% endblock %}
+{% block body_class %}admin{% endblock %}
+{% block header %}
+  {% set here = request.url.path %}
+  <header class="admin-bar">
+    <div class="wrap">
+      <a class="brand" href="{{ rel('/admin/dashboard') }}">{{ site_title }} <span>Admin</span></a>
+      {% if nav_user %}
+        <nav class="admin-nav" aria-label="Admin">
+          <ul>
+            <li><a href="{{ rel('/admin/dashboard') }}" {% if here == '/admin/dashboard' %}aria-current="page"{% endif %}>Dashboard</a></li>
+            <li><a href="{{ rel('/admin/content') }}" {% if here == '/admin/content' %}aria-current="page"{% endif %}>Content</a></li>
+            <li><a href="{{ rel('/admin/posts') }}" {% if here.startswith('/admin/posts') %}aria-current="page"{% endif %}>News</a></li>
+            {% if nav_is_manager %}
+              <li><a href="{{ rel('/admin/pages') }}" {% if here.startswith('/admin/pages') %}aria-current="page"{% endif %}>Pages</a></li>
+              <li><a href="{{ rel('/admin/users') }}" {% if here.startswith('/admin/users') %}aria-current="page"{% endif %}>Users</a></li>
+            {% endif %}
+          </ul>
+          {% if csrf_token %}
+            <form method="post" action="/logout">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="btn btn-quiet btn-small">Log out</button>
+            </form>
+          {% endif %}
+        </nav>
+      {% endif %}
+    </div>
+  </header>
+{% endblock %}
+{% block footer %}{% endblock %}

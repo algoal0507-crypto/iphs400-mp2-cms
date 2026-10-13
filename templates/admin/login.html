@@ -1,11 +1,13 @@
 {% extends "admin/base_admin.html" %}
 {% block content %}
+  <div class="login-card">
   <h1>Log in</h1>
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
-  <form method="post" action="/login">
+  <form class="stack" method="post" action="/login">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label>Email <input type="email" name="email" required autofocus></label>
     <label>Password <input type="password" name="password" required></label>
-    <button type="submit">Log in</button>
+    <button type="submit" class="btn">Log in</button>
   </form>
+  </div>
 {% endblock %}

@@ -1,21 +1,23 @@
 {% extends "admin/base_admin.html" %}
 {% block content %}
   <h1>News</h1>
-  <p><a href="{{ rel('/admin/posts/new') }}">+ New News post</a></p>
-  <ul>
+  <p><a class="btn" href="{{ rel('/admin/posts/new') }}">New News post</a></p>
+  <ul class="rows">
     {% for post in posts %}
       <li>
+        <span class="grow">
         {% if is_manager or post['status'] == 'draft' %}
           <a href="{{ rel('/admin/posts/' ~ post['slug']) }}">{{ post['title'] }}</a>
         {% else %}
           {{ post['title'] }}
         {% endif %}
-        — {{ post['status'] }}
+        </span>
+        <span class="badge badge-{{ post['status'] }}">{{ post['status'] }}</span>
         {% if is_manager or post['status'] == 'draft' %}
-          <form method="post" action="/admin/posts/{{ post['slug'] }}/delete" style="display:inline"
+          <form method="post" action="/admin/posts/{{ post['slug'] }}/delete" 
                 onsubmit="return confirm('Delete this News post? This cannot be undone.')">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button type="submit">Delete</button>
+            <button type="submit" class="btn btn-danger btn-small">Delete</button>
           </form>
         {% endif %}
       </li>

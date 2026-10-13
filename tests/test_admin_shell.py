@@ -14,7 +14,7 @@ import pytest
 from app.urls import relative_url
 
 STYLESHEET = re.compile(r'<link rel="stylesheet" href="([^"]+)"')
-HEADER_LINK = re.compile(r"<header>\s*<a href=\"([^\"]+)\"")
+HEADER_LINK = re.compile(r'<header[^>]*>\s*<div class="wrap">\s*<a [^>]*?href="([^"]+)"')
 
 
 @pytest.mark.parametrize("from_path, to_path, expected", [

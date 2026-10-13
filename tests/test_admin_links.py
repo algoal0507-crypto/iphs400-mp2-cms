@@ -19,7 +19,7 @@ HREF = re.compile(r'href="([^"]+)"')
 def _local_hrefs(html: str) -> list[str]:
     """Links inside <main> only: the shared base.html header links are the public
     site's relative paths and are out of scope for this test."""
-    main = re.search(r"<main>(.*?)</main>", html, re.S).group(1)
+    main = re.search(r"<main[^>]*>(.*?)</main>", html, re.S).group(1)
     return [h for h in HREF.findall(main) if not h.startswith(("http", "#", "mailto:", "tel:"))]
 
 
