@@ -131,13 +131,13 @@ def post_edit_submit(
     user, error = _require_staff(request)
     if error is not None:
         return error
+    if not auth.csrf_is_valid(request, csrf_token):
+        return PlainTextResponse("Invalid CSRF token.", status_code=403)
     existing = db.get_post_by_slug(slug)
     if existing is None:
         return PlainTextResponse("Not found.", status_code=404)
     if _editor_locked_out(user, existing):
         return PlainTextResponse("Forbidden.", status_code=403)
-    if not auth.csrf_is_valid(request, csrf_token):
-        return PlainTextResponse("Invalid CSRF token.", status_code=403)
 
     if not title.strip():
         return auth.render_with_csrf(
@@ -166,10 +166,10 @@ def _change_status(request: Request, slug: str, csrf_token: str | None, status: 
     user, error = _require_manager(request)
     if error is not None:
         return error
-    if db.get_post_by_slug(slug) is None:
-        return PlainTextResponse("Not found.", status_code=404)
     if not auth.csrf_is_valid(request, csrf_token):
         return PlainTextResponse("Invalid CSRF token.", status_code=403)
+    if db.get_post_by_slug(slug) is None:
+        return PlainTextResponse("Not found.", status_code=404)
     db.set_post_status(slug, status)
     return RedirectResponse(f"/admin/posts/{slug}", status_code=303)
 
@@ -189,13 +189,13 @@ def post_delete(request: Request, slug: str, csrf_token: str | None = Form(None)
     user, error = _require_staff(request)
     if error is not None:
         return error
+    if not auth.csrf_is_valid(request, csrf_token):
+        return PlainTextResponse("Invalid CSRF token.", status_code=403)
     post = db.get_post_by_slug(slug)
     if post is None:
         return PlainTextResponse("Not found.", status_code=404)
     if _editor_locked_out(user, post):
         return PlainTextResponse("Forbidden.", status_code=403)
-    if not auth.csrf_is_valid(request, csrf_token):
-        return PlainTextResponse("Invalid CSRF token.", status_code=403)
 
     db.delete_post(slug)
     return RedirectResponse("/admin/posts", status_code=303)

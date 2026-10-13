@@ -82,10 +82,12 @@ def user_new_submit(
     email = email.strip().lower()
     values = {"email": email, "role": role}
     problem = None
-    if not _EMAIL_RE.fullmatch(email):
+    if len(email) > auth.MAX_EMAIL_LENGTH or not _EMAIL_RE.fullmatch(email):
         problem = "Enter a valid email address."
     elif len(password) < MIN_PASSWORD_LENGTH:
         problem = f"Password must be at least {MIN_PASSWORD_LENGTH} characters."
+    elif len(password) > auth.MAX_PASSWORD_LENGTH:
+        problem = f"Password must be at most {auth.MAX_PASSWORD_LENGTH} characters."
     elif role not in ROLES:
         problem = "Choose a role."
     elif db.get_user_by_email(email) is not None:
@@ -115,11 +117,11 @@ def user_change_role(
     user, error = _require_manager(request)
     if error is not None:
         return error
+    if not auth.csrf_is_valid(request, csrf_token):
+        return PlainTextResponse("Invalid CSRF token.", status_code=403)
     target = _target(user_id)
     if target is None:
         return PlainTextResponse("Not found.", status_code=404)
-    if not auth.csrf_is_valid(request, csrf_token):
-        return PlainTextResponse("Invalid CSRF token.", status_code=403)
     if role not in ROLES:
         return _render_list(request, user, error="Choose a valid role.", status_code=400)
     if target["id"] == user["id"]:
@@ -133,11 +135,11 @@ def user_deactivate(request: Request, user_id: int, csrf_token: str | None = For
     user, error = _require_manager(request)
     if error is not None:
         return error
+    if not auth.csrf_is_valid(request, csrf_token):
+        return PlainTextResponse("Invalid CSRF token.", status_code=403)
     target = _target(user_id)
     if target is None:
         return PlainTextResponse("Not found.", status_code=404)
-    if not auth.csrf_is_valid(request, csrf_token):
-        return PlainTextResponse("Invalid CSRF token.", status_code=403)
     if target["id"] == user["id"]:
         return _render_list(request, user, error="You cannot deactivate your own account.",
                             status_code=400)

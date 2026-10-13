@@ -126,10 +126,10 @@ def page_edit_submit(
     user, error = _require_manager(request)
     if error is not None:
         return error
-    if db.get_page_by_slug(slug) is None:
-        return PlainTextResponse("Not found.", status_code=404)
     if not auth.csrf_is_valid(request, csrf_token):
         return PlainTextResponse("Invalid CSRF token.", status_code=403)
+    if db.get_page_by_slug(slug) is None:
+        return PlainTextResponse("Not found.", status_code=404)
     if status not in ("draft", "published"):
         status = "draft"
     if status == "published" and db.is_news_slug(slug):
@@ -164,10 +164,10 @@ def page_delete(request: Request, slug: str, csrf_token: str | None = Form(None)
     user, error = _require_manager(request)
     if error is not None:
         return error
-    if db.get_page_by_slug(slug) is None:
-        return PlainTextResponse("Not found.", status_code=404)
     if not auth.csrf_is_valid(request, csrf_token):
         return PlainTextResponse("Invalid CSRF token.", status_code=403)
+    if db.get_page_by_slug(slug) is None:
+        return PlainTextResponse("Not found.", status_code=404)
 
     db.delete_page(slug)
     return RedirectResponse("/admin/pages", status_code=303)

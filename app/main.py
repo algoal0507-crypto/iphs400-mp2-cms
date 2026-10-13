@@ -14,15 +14,32 @@ from fastapi.responses import Response
 from fastapi.templating import Jinja2Templates
 
 from app import publish, settings, urls
+from app.auth import require_role
 
 templates = urls.install(Jinja2Templates(directory=str(settings.TEMPLATES)))
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="IPHS 400 MP2 CMS")
+    # No generated API docs: they would list every admin route to anyone who asks.
+    app = FastAPI(title="IPHS 400 MP2 CMS", docs_url=None, redoc_url=None, openapi_url=None)
+
+    @app.middleware("http")
+    async def admin_response_headers(request: Request, call_next):
+        """Admin and login pages: not framed, not cached, not sniffed."""
+        response = await call_next(request)
+        path = request.url.path
+        if path == "/admin" or path.startswith("/admin/") or path.rstrip("/") in ("/login", "/logout"):
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            if path not in ("/admin/style.css", "/admin/preview.js"):  # the two asset files may be cached
+                response.headers["Cache-Control"] = "no-store"
+        return response
 
     @app.get("/admin")
     def admin_home(request: Request):
+        _, error = require_role(request)
+        if error is not None:
+            return error
         return templates.TemplateResponse(
             request, "admin/hello.html", {"title": "Admin"}
         )

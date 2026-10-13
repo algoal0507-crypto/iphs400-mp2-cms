@@ -5,10 +5,17 @@ door.
 """
 
 
-def test_admin_console_answers(client):
-    response = client.get("/admin")
+def test_admin_console_answers(client_as):
+    # T07: /admin is an admin URL, so it answers a signed-in user (see
+    # tests/test_access_control.py for what an anonymous visitor gets).
+    response = client_as("admin").get("/admin")
     assert response.status_code == 200
     assert "hello admin" in response.text.lower()
+
+
+def test_admin_console_sends_anonymous_visitors_to_login(client):
+    response = client.get("/admin", follow_redirects=False)
+    assert response.status_code in (302, 303) and response.headers["location"].endswith("/login")
 
 
 def test_public_home_answers(client):

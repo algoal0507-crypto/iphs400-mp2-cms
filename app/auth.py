@@ -25,7 +25,14 @@ SESSION_COOKIE = "session"
 SESSION_MAX_AGE = 60 * 60 * 8  # 8 hours
 CSRF_COOKIE = "csrf_token"
 
+# Longest password or email the forms will take: a bound on what one request can make
+# the server hold and hash, far above anything a person types.
+MAX_PASSWORD_LENGTH = 1024
+MAX_EMAIL_LENGTH = 254  # the length limit for an email address
+
 _hasher = PasswordHasher()
+# Checked against when an email has no account, so that login takes the same time either way.
+_DUMMY_HASH = _hasher.hash("no-such-account")
 _serializer = URLSafeTimedSerializer(settings.SECRET_KEY, salt="session")
 
 
@@ -33,7 +40,19 @@ def hash_password(password: str) -> str:
     return _hasher.hash(password)
 
 
-def verify_password(password: str, password_hash: str) -> bool:
+def verify_password(password: str, password_hash: str | None) -> bool:
+    """True only if `password` matches `password_hash`.
+
+    With no hash (an email that has no account) it still does the same slow
+    work against a throwaway hash and returns False, so how long a login takes
+    does not reveal whether the account exists.
+    """
+    if password_hash is None:
+        try:
+            _hasher.verify(_DUMMY_HASH, password)
+        except (VerifyMismatchError, VerificationError, InvalidHash):
+            pass
+        return False
     try:
         return _hasher.verify(password_hash, password)
     except (VerifyMismatchError, VerificationError, InvalidHash):

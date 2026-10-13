@@ -35,8 +35,10 @@ def login_submit(
     if not auth.csrf_is_valid(request, csrf_token):
         return _rejected(request, "Your session expired. Please try again.", status_code=403)
 
+    if len(password) > auth.MAX_PASSWORD_LENGTH or len(email) > auth.MAX_EMAIL_LENGTH:
+        return _rejected(request, "Invalid email or password.", status_code=401)
     user = db.get_user_by_email(email.strip().lower())
-    if user is None or not auth.verify_password(password, user["password_hash"]):
+    if not auth.verify_password(password, user["password_hash"] if user else None):
         return _rejected(request, "Invalid email or password.", status_code=401)
     if not user["active"]:
         # Said only after the password checks out, so it can't be used to find
