@@ -1,0 +1,6 @@
+{#- Live Markdown preview. Include inside the page, after a <form> carrying
+    data-preview-url="{{ rel('/admin/preview') }}" with a body_md textarea and a
+    csrf_token field. Script lives in preview.js, served at /admin/preview.js. -#}
+<h2>Preview</h2>
+<div id="preview" class="preview">{{ preview_html | default('') | safe }}</div>
+<script src="{{ rel('/admin/preview.js') }}"></script>

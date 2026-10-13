@@ -93,7 +93,9 @@ def test_saved_markdown_is_sanitized(client_as):
     assert "onerror" not in page["body_md"]
     assert "Tacos al pastor" in page["body_md"]
 
-    assert "<script" not in response.text
+    assert "alert(1)" not in response.text
+    # The only <script> on the page is the preview.js include, not the payload.
+    assert response.text.count("<script") == 1 and '<script src="' in response.text
     assert "onerror" not in response.text
 
 

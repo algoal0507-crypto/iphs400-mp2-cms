@@ -1,8 +1,4 @@
-"""Login, logout, and the one protected landing route T01 needs.
-
-Later tickets add real admin routes; they should follow the same pattern —
-`auth.read_session` to find the user, redirect to /login if there isn't one.
-"""
+"""Login and logout. The dashboard and other admin routes live in routes/admin.py."""
 from __future__ import annotations
 
 from fastapi import APIRouter, Form, Request
@@ -61,15 +57,3 @@ def logout(request: Request, csrf_token: str | None = Form(None)):
     response = RedirectResponse("/login", status_code=303)
     auth.clear_session_cookie(response)
     return response
-
-
-@router.get("/admin/dashboard")
-def admin_dashboard(request: Request):
-    user = _current_user(request)
-    if user is None:
-        return RedirectResponse("/login", status_code=303)
-    role_label = "Manager" if user["role"] == "admin" else "Editor"
-    return _render_with_csrf(
-        request, "admin/dashboard.html",
-        {"title": "Dashboard", "role_label": role_label, "email": user["email"]},
-    )

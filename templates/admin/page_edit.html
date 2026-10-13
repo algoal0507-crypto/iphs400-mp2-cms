@@ -3,7 +3,7 @@
   <h1>Edit {{ page['title'] }}</h1>
   {% if saved %}<p class="success">Saved.</p>{% endif %}
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
-  <form method="post" action="/admin/pages/{{ page['slug'] }}">
+  <form method="post" data-preview-url="{{ rel('/admin/preview') }}" action="/admin/pages/{{ page['slug'] }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label>Title <input type="text" name="title" value="{{ page['title'] }}" required></label>
     <label>Body (Markdown)
@@ -17,6 +17,5 @@
     </label>
     <button type="submit">Save</button>
   </form>
-  <h2>Preview</h2>
-  <div class="preview">{{ preview_html | safe }}</div>
+  {% include "admin/_preview.html" %}
 {% endblock %}

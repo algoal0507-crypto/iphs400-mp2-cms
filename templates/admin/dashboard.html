@@ -2,6 +2,20 @@
 {% block content %}
   <h1>Welcome, {{ role_label }}</h1>
   <p>Signed in as {{ email }}.</p>
+  <h2>News</h2>
+  <p>
+    <span data-count="news-draft">{{ news_counts['draft'] }}</span> draft,
+    <span data-count="news-published">{{ news_counts['published'] }}</span> published
+  </p>
+  {% if pages is not none %}
+    <h2>Pages</h2>
+    <ul>
+      {% for page in pages %}
+        <li data-page="{{ page['slug'] }}">{{ page['title'] }} — {{ page['status'] }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <p><a href="{{ rel('/admin/content') }}">All content</a></p>
   {% if role_label == "Manager" %}
     <p><a href="{{ rel('/admin/pages') }}">Edit permanent pages (Home, Menu, Our Story)</a></p>
   {% endif %}

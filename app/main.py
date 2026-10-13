@@ -32,6 +32,11 @@ def create_app() -> FastAPI:
         # Same stylesheet the exported site ships; admin pages link it relatively.
         return Response(publish.CSS, media_type="text/css")
 
+    @app.get("/admin/preview.js")
+    def admin_preview_script():
+        return Response((settings.TEMPLATES / "admin" / "preview.js").read_text(),
+                        media_type="text/javascript")
+
     @app.get("/")
     def public_home(request: Request):
         return templates.TemplateResponse(
@@ -39,8 +44,9 @@ def create_app() -> FastAPI:
             {"title": settings.SITE_TITLE, "items": []},
         )
 
-    from app.routes import auth, pages, posts
+    from app.routes import admin, auth, pages, posts
     app.include_router(auth.router)
+    app.include_router(admin.router)
     app.include_router(pages.router)
     app.include_router(posts.router)
     return app
