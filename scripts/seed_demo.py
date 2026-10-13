@@ -104,7 +104,7 @@ La Once Mil received one MICHELIN star in 2026.
 The idea behind the menu is simple: take the traditional street-taco format most \
 people know as fast, inexpensive food, and elevate it with high-quality \
 ingredients — from A5 wagyu to 12-hour-cooked lechón — while keeping the \
-taquería, walk-in-only spirit of a real taquería.
+spirit of a taquería.
 
 [PLACEHOLDER: chef/kitchen photo]
 """
@@ -207,8 +207,8 @@ NEWS_POSTS = [
 ]
 
 
-# Wording decided for Our Story after review: neither the "first and only" claim nor
-# "counter-service" is in our sources. Matching ignores how the text was wrapped or
+# Wording decided for Our Story after review: the "first and only" claim is not in our
+# sources, and the closing clause now reads "while keeping the spirit of a taquería." Matching ignores how the text was wrapped or
 # spaced, and a replacement only happens where the old text is still there, so a
 # Manager's own rewording is never overwritten.
 def _loose(text: str) -> "re.Pattern[str]":
@@ -220,8 +220,11 @@ _WORDING_FIXES = {
         (_loose("In 2026, La Once Mil became the first — and so far only — taquería to receive a "
                 "Michelin star, awarded to this Lomas de Chapultepec address specifically."),
          "La Once Mil received one MICHELIN star in 2026."),
-        (_loose("keeping the counter-service, walk-in-only spirit"),
-         "keeping the taquería, walk-in-only spirit"),
+        # Both earlier versions of the closing clause (the original and the interim one).
+        (_loose("while keeping the counter-service, walk-in-only spirit of a real taquería."),
+         "while keeping the spirit of a taquería."),
+        (_loose("while keeping the taquería, walk-in-only spirit of a real taquería."),
+         "while keeping the spirit of a taquería."),
     ],
 }
 
@@ -235,7 +238,8 @@ def refresh_public_copy() -> int:
     A page whose body is still exactly what we first seeded is replaced.
     Anything the Manager has edited keeps their edits and only loses the two
     known problems: a first line that repeats the page title as a heading, and
-    a sentence pointing at a `notes/` file. Returns how many pages changed;
+    a sentence pointing at a `notes/` file, plus the agreed Our Story wording
+    (_WORDING_FIXES), each only where the old text is still there. Returns how many pages changed;
     safe to run any number of times.
     """
     fresh = {"menu": (LEGACY_MENU_BODY, MENU_BODY),
