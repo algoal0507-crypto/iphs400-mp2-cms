@@ -171,3 +171,62 @@ def test_refresh_leaves_a_draft_pages_status_alone_and_an_untitled_start_unchang
     seed.refresh_public_copy()
     after = db.get_page_by_slug("menu")
     assert after["status"] == "draft" and after["body_md"] == "Just text, no heading."
+
+
+# --- Our Story wording (T09, final copy decisions) ----------------------------
+
+STAR_SENTENCE = "La Once Mil received one MICHELIN star in 2026."
+OLD_STAR_SENTENCE = ("In 2026, La Once Mil became the first — and so far only — taquería to receive a "
+                     "Michelin star, awarded to this Lomas de Chapultepec address specifically.")
+
+
+def test_our_story_uses_the_agreed_wording_in_seed_and_export(site):
+    html = _visible((site / "our-story.html").read_text())
+    assert STAR_SENTENCE in html
+    assert "counter-service" not in html and "so far only" not in html and "became the first" not in html
+    assert "keeping the taquería, walk-in-only spirit" in html
+
+
+def test_refresh_applies_the_wording_to_a_saved_page_and_keeps_other_edits(seed):
+    saved = seed.OUR_STORY_BODY.replace(STAR_SENTENCE, OLD_STAR_SENTENCE)
+    saved = saved.replace("keeping the taquería,", "keeping the counter-service,")
+    saved += "\nOpen since 2024, still no reservations.\n"
+    _save("our-story", saved)
+    assert seed.refresh_public_copy() == 1
+    body = db.get_page_by_slug("our-story")["body_md"]
+    assert STAR_SENTENCE in body and "counter-service" not in body and "so far only" not in body
+    assert "Open since 2024, still no reservations." in body          # the Manager's addition survives
+    assert "Jimena Gutiérrez" in body                                  # the rest is untouched
+    assert seed.refresh_public_copy() == 0                             # and it is idempotent
+
+
+def test_refresh_leaves_a_page_alone_when_the_manager_already_reworded_the_sentence(seed):
+    saved = seed.OUR_STORY_BODY.replace(STAR_SENTENCE, "We hold a Michelin star, since 2026.")
+    _save("our-story", saved)
+    seed.refresh_public_copy()
+    assert db.get_page_by_slug("our-story")["body_md"] == saved
+
+
+def test_refresh_finds_the_old_sentence_even_if_it_was_wrapped_or_saved_with_crlf(seed):
+    wrapped = OLD_STAR_SENTENCE.replace("became the first", "became\nthe first").replace("so far only —", "so far   only —")
+    saved = seed.OUR_STORY_BODY.replace(STAR_SENTENCE, wrapped).replace("\n", "\r\n")
+    _save("our-story", saved)
+    assert seed.refresh_public_copy() == 1
+    body = db.get_page_by_slug("our-story")["body_md"]
+    assert STAR_SENTENCE in body and "so far" not in body
+    assert "\r\n" in body                                              # line endings are left as saved
+
+
+def test_a_manager_edit_next_to_the_old_wording_survives(seed):
+    saved = seed.OUR_STORY_BODY.replace("keeping the taquería,", "keeping the counter-service,")
+    saved = saved.replace("12-hour-cooked lechón", "slow-cooked lechón")
+    _save("our-story", saved)
+    seed.refresh_public_copy()
+    body = db.get_page_by_slug("our-story")["body_md"]
+    assert "slow-cooked lechón" in body and "counter-service" not in body
+
+
+def test_wording_fixes_do_not_touch_other_pages(seed):
+    _save("menu", "Counter-service style: keeping the counter-service, walk-in-only spirit")
+    seed.refresh_public_copy()
+    assert "counter-service" in db.get_page_by_slug("menu")["body_md"]

@@ -99,13 +99,12 @@ City, opened in 2024 by chef César de la Parra together with Enrique Glennie an
 Jimena Gutiérrez. The name comes from 11000, the postal code of the neighborhood \
 where the restaurant began.
 
-In 2026, La Once Mil became the first — and so far only — taquería to receive a \
-Michelin star, awarded to this Lomas de Chapultepec address specifically.
+La Once Mil received one MICHELIN star in 2026.
 
 The idea behind the menu is simple: take the traditional street-taco format most \
 people know as fast, inexpensive food, and elevate it with high-quality \
 ingredients — from A5 wagyu to 12-hour-cooked lechón — while keeping the \
-counter-service, walk-in-only spirit of a real taquería.
+taquería, walk-in-only spirit of a real taquería.
 
 [PLACEHOLDER: chef/kitchen photo]
 """
@@ -208,6 +207,24 @@ NEWS_POSTS = [
 ]
 
 
+# Wording decided for Our Story after review: neither the "first and only" claim nor
+# "counter-service" is in our sources. Matching ignores how the text was wrapped or
+# spaced, and a replacement only happens where the old text is still there, so a
+# Manager's own rewording is never overwritten.
+def _loose(text: str) -> "re.Pattern[str]":
+    return re.compile(r"\s+".join(re.escape(word) for word in text.split()))
+
+
+_WORDING_FIXES = {
+    "our-story": [
+        (_loose("In 2026, La Once Mil became the first — and so far only — taquería to receive a "
+                "Michelin star, awarded to this Lomas de Chapultepec address specifically."),
+         "La Once Mil received one MICHELIN star in 2026."),
+        (_loose("keeping the counter-service, walk-in-only spirit"),
+         "keeping the taquería, walk-in-only spirit"),
+    ],
+}
+
 # A sentence that points at a project file, e.g. "... see `notes/foo.md`: ...".
 _INTERNAL_NOTE = re.compile(r" ?[^.\n]*`notes/[^`\n]*`[^.\n]*\.")
 
@@ -235,6 +252,8 @@ def refresh_public_copy() -> int:
                 # The title is already the page's <h1>, so what were sub-headings
                 # under it become the page's top-level sections.
                 new = re.sub(r"(?m)^### ", "## ", rest.lstrip("\n"))
+        for pattern, replacement in _WORDING_FIXES.get(slug, []):
+            new = pattern.sub(replacement, new)
         if new != body:
             db.update_page(slug, title=page["title"], body_md=new,
                            status=page["status"], author_id=page["author_id"])
