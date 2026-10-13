@@ -6,26 +6,73 @@
   <title>Home — La Once Mil</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <header>
-    <a href="index.html">La Once Mil</a>
-    
-      <nav>
-        <ul><li><a href="menu.html">Menu</a></li><li><a href="our-story.html">Our Story</a></li></ul>
-      </nav>
-    
+<body class="public">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">La Once Mil</a>
+      
+        <nav class="site-nav" aria-label="Main">
+          <ul><li><a href="menu.html">Menu</a></li><li><a href="our-story.html">Our Story</a></li><li><a href="news.html">News</a></li></ul>
+        </nav>
+      
+    </div>
   </header>
-  <main>
-  <h1>Home</h1>
-  <div class="page-body"><h2>Visit La Once Mil</h2>
+  
+  <main id="main"><div class="wrap">
+  <section class="hero">
+    <p class="eyebrow">Lomas de Chapultepec · Mexico City</p>
+    <h1>La Once Mil</h1>
+    <p class="lede">A Michelin-starred taquería. Walk in, no reservations: first come, first served.</p>
+    <hr class="rule">
+  </section>
+
+  <section class="visit"><h2>Visit La Once Mil</h2>
 <p><strong>Address:</strong> Monte Everest 780, Lomas de Chapultepec, Miguel Hidalgo, CP 11000, Mexico City</p>
 <p><strong>Hours:</strong> Monday-Friday 12:00 PM-11:30 PM · Saturday-Sunday 11:00 AM-11:30 PM</p>
 <p><a href="https://maps.google.com/?q=Monte+Everest+780+Lomas+de+Chapultepec+Ciudad+de+Mexico" rel="noopener noreferrer">Get directions</a></p>
 <p>Walk-ins only — no reservations, first come, first served.</p>
 <p>One MICHELIN Star, awarded 2026, attributed to this address.</p>
-<p>[PLACEHOLDER: storefront photo]</p>
-</div>
-</main>
-  <footer><small>IPHS 400 Mini-Project #2</small></footer>
+<figure class="placeholder"><figcaption>PLACEHOLDER: storefront photo</figcaption></figure>
+</section>
+
+  
+  <section class="entry-points" aria-labelledby="explore">
+    <h2 id="explore">Explore</h2>
+    <ul>
+      
+        <li>
+          <a class="entry" href="menu.html">
+            <h3>Menu</h3>
+            <p>Tacos, salsas, and desserts.</p>
+          </a>
+        </li>
+      
+        <li>
+          <a class="entry" href="our-story.html">
+            <h3>Our Story</h3>
+            <p>From a postal code to a Michelin star.</p>
+          </a>
+        </li>
+      
+        <li>
+          <a class="entry" href="news.html">
+            <h3>News</h3>
+            <p>Announcements and updates.</p>
+          </a>
+        </li>
+      
+    </ul>
+  </section>
+  
+</div></main>
+  
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>A student prototype for IPHS 400 Mini-Project #2. Not affiliated with or endorsed by La Once Mil.</p>
+    </div>
+  </footer>
+  
 </body>
 </html>
