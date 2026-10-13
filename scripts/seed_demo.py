@@ -13,6 +13,7 @@ The rubric expects this to run clean on a fresh clone with .env.example values
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -43,7 +44,77 @@ One MICHELIN Star, awarded 2026, attributed to this address.
 [PLACEHOLDER: storefront photo]
 """
 
+# The page title is the <h1> on the public page, so a body never starts with
+# a heading that repeats it. No prices: no verified peso pricing exists
+# (see notes/restaurant-research.md; that note stays in the project notes, not
+# on the public page).
 MENU_BODY = """\
+Gourmet tacos that elevate traditional street-taco formats.
+
+## Tacos
+
+- **Carne asada**
+  Beef
+- **Arrachera**
+  Skirt steak taco
+- **Picaña (trompo)**
+  Top sirloin taco, cooked on the trompo
+- **A5 Wagyu**
+  Hand-pressed tortilla, spicy soy salsa. Signature dish
+- **Lechón (carnitas)**
+  12-hour cooked suckling pig
+- **Rib eye**
+  Beef
+- **Bass al pastor**
+- **Vegan options**
+  Available
+
+## Beyond tacos
+
+- **Tostadas**
+  Including tuna and ceviche
+- **Quesadillas**
+- **Noodle soup**
+- **Caesar salad**
+
+## Salsas
+
+- **Salsa cruda**
+  Mild
+- **Martajada**
+  Very spicy, made with árbol and morita chiles
+
+## Desserts
+
+- **Sorbets**
+- **Ice creams**
+- **Meringues**
+
+[PLACEHOLDER: menu photo]
+"""
+
+OUR_STORY_BODY = """\
+La Once Mil is a taquería at Monte Everest 780 in Lomas de Chapultepec, Mexico \
+City, opened in 2024 by chef César de la Parra together with Enrique Glennie and \
+Jimena Gutiérrez. The name comes from 11000, the postal code of the neighborhood \
+where the restaurant began.
+
+In 2026, La Once Mil became the first — and so far only — taquería to receive a \
+Michelin star, awarded to this Lomas de Chapultepec address specifically.
+
+The idea behind the menu is simple: take the traditional street-taco format most \
+people know as fast, inexpensive food, and elevate it with high-quality \
+ingredients — from A5 wagyu to 12-hour-cooked lechón — while keeping the \
+counter-service, walk-in-only spirit of a real taquería.
+
+[PLACEHOLDER: chef/kitchen photo]
+"""
+
+# The text these two pages shipped with before the T09 copy fix. Kept so an
+# existing database can be brought up to date: a page whose body is still
+# exactly this is replaced; a page someone has edited only loses the two known
+# problems below, and keeps everything else they changed.
+LEGACY_MENU_BODY = """\
 ## Menu
 
 Gourmet tacos elevating traditional street-taco formats. No prices are listed — \
@@ -74,7 +145,7 @@ Sorbets, ice creams, and meringues.
 [PLACEHOLDER: menu photo]
 """
 
-OUR_STORY_BODY = """\
+LEGACY_OUR_STORY_BODY = """\
 ## Our Story
 
 La Once Mil is a taquería at Monte Everest 780 in Lomas de Chapultepec, Mexico \
@@ -137,6 +208,41 @@ NEWS_POSTS = [
 ]
 
 
+# A sentence that points at a project file, e.g. "... see `notes/foo.md`: ...".
+_INTERNAL_NOTE = re.compile(r" ?[^.\n]*`notes/[^`\n]*`[^.\n]*\.")
+
+
+def refresh_public_copy() -> int:
+    """Fix the duplicate-heading and internal-note problems in saved pages.
+
+    A page whose body is still exactly what we first seeded is replaced.
+    Anything the Manager has edited keeps their edits and only loses the two
+    known problems: a first line that repeats the page title as a heading, and
+    a sentence pointing at a `notes/` file. Returns how many pages changed;
+    safe to run any number of times.
+    """
+    fresh = {"menu": (LEGACY_MENU_BODY, MENU_BODY),
+             "our-story": (LEGACY_OUR_STORY_BODY, OUR_STORY_BODY)}
+    changed = 0
+    for page in db.list_pages():
+        slug, body = page["slug"], page["body_md"]
+        if slug in fresh and body == fresh[slug][0]:
+            new = fresh[slug][1]
+        else:
+            new = _INTERNAL_NOTE.sub("", body)
+            first, _, rest = new.partition("\n")
+            if first.startswith("#") and first.lstrip("#").strip().lower() == page["title"].lower():
+                # The title is already the page's <h1>, so what were sub-headings
+                # under it become the page's top-level sections.
+                new = re.sub(r"(?m)^### ", "## ", rest.lstrip("\n"))
+        if new != body:
+            db.update_page(slug, title=page["title"], body_md=new,
+                           status=page["status"], author_id=page["author_id"])
+            print(f"Updated public copy: {slug}")
+            changed += 1
+    return changed
+
+
 def main() -> int:
     admin_pw = os.environ.get("CMS_ADMIN_PASSWORD")
     editor_pw = os.environ.get("CMS_EDITOR_PASSWORD")
@@ -167,6 +273,8 @@ def main() -> int:
                 status="published", author_id=manager["id"],
             )
             print(f"Seeded permanent page: {slug}")
+
+    refresh_public_copy()
 
     for slug, title, created_at, status, body_md in NEWS_POSTS:
         created = db.create_post(

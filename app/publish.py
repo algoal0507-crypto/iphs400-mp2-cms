@@ -98,10 +98,10 @@ def render_site(out: Path | None = None) -> Path:
     page_template = env.get_template("public/page.html")
     home_template = env.get_template("public/home_page.html")
 
-    def write_item(filename: str, item, template=page_template) -> None:
+    def write_item(filename: str, item, template=page_template, css_class="") -> None:
         (out / filename).write_text(
             template.render(
-                page_title=item["title"],
+                page_title=item["title"], page_class=css_class,
                 body_html=mark_placeholders(content.render_markdown(item["body_md"])),
                 **layout,
             )
@@ -109,7 +109,8 @@ def render_site(out: Path | None = None) -> Path:
 
     for page in published:
         write_item(_out_name(page["slug"]), page,
-                   home_template if page["slug"] == HOME_SLUG else page_template)
+                   home_template if page["slug"] == HOME_SLUG else page_template,
+                   css_class=f"page-{page['slug']}")
     for post in posts:
         write_item(f"{db.NEWS_PREFIX}{post['slug']}.html", post)
 

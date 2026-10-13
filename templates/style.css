@@ -82,7 +82,20 @@ a:hover { color: var(--burgundy-dark); }
 .public .page-body > :first-child { margin-top: 0; }
 .public .page-body ul { padding-left: 1.2rem; }
 .public .page-body li { margin-bottom: 0.45rem; }
-.public .page-body code { background: var(--ivory-deep); padding: 0.1em 0.35em; border-radius: 4px; }
+
+/* The Menu page reads like a menu: sections with a rule, the bold dish name
+   leads on its own line, the description sits under it in a quieter colour. */
+.page-menu .page-body ul { list-style: none; margin: 0 0 1rem; padding: 0; }
+.page-menu .page-body li { margin: 0; padding-block: 0.85rem; border-bottom: 1px solid var(--rule); color: var(--muted); }
+.page-menu .page-body li:last-child { border-bottom: 0; }
+.page-menu .page-body li > strong:first-child {
+  display: block; font-family: var(--serif); font-size: 1.2rem; font-weight: 600; color: var(--charcoal);
+}
+.page-menu .page-body h2 {
+  margin-top: 3rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--burgundy); letter-spacing: 0.02em;
+}
+.page-menu .page-body > p:first-child,
+.page-our-story .page-body > p:first-child { font-size: 1.15rem; color: var(--muted); }
 
 /* Placeholder for a photo we do not have rights to yet. */
 .placeholder {
