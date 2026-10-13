@@ -1,0 +1,24 @@
+{% extends "admin/base_admin.html" %}
+{% block content %}
+  <h1>News</h1>
+  <p><a href="{{ rel('/admin/posts/new') }}">+ New News post</a></p>
+  <ul>
+    {% for post in posts %}
+      <li>
+        {% if is_manager or post['status'] == 'draft' %}
+          <a href="{{ rel('/admin/posts/' ~ post['slug']) }}">{{ post['title'] }}</a>
+        {% else %}
+          {{ post['title'] }}
+        {% endif %}
+        — {{ post['status'] }}
+        {% if is_manager or post['status'] == 'draft' %}
+          <form method="post" action="/admin/posts/{{ post['slug'] }}/delete" style="display:inline"
+                onsubmit="return confirm('Delete this News post? This cannot be undone.')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit">Delete</button>
+          </form>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

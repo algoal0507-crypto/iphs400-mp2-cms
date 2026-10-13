@@ -39,13 +39,10 @@ def create_app() -> FastAPI:
             {"title": settings.SITE_TITLE, "items": []},
         )
 
-    from app.routes import auth, pages
+    from app.routes import auth, pages, posts
     app.include_router(auth.router)
     app.include_router(pages.router)
-
-    # Your ticket work plugs in here, e.g.
-    #   from app.routes import posts
-    #   app.include_router(posts.router)
+    app.include_router(posts.router)
     return app
 
 

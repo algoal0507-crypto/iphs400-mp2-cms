@@ -5,6 +5,7 @@
   {% if role_label == "Manager" %}
     <p><a href="{{ rel('/admin/pages') }}">Edit permanent pages (Home, Menu, Our Story)</a></p>
   {% endif %}
+  <p><a href="{{ rel('/admin/posts') }}">News posts</a></p>
   <form method="post" action="/logout">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <button type="submit">Log out</button>

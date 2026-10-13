@@ -1,6 +1,14 @@
 {% extends "admin/base_admin.html" %}
 {% block content %}
   <h1>Pages</h1>
+  {% if news_conflicts %}
+    <p class="error">
+      These pages use slugs reserved for News (<code>news</code> or <code>news-…</code>)
+      and cannot be published or exported:
+      {% for page in news_conflicts %}<code>{{ page['slug'] }}</code>{% if not loop.last %}, {% endif %}{% endfor %}.
+      They have not been changed or deleted.
+    </p>
+  {% endif %}
   <p><a href="{{ rel('/admin/pages/new') }}">+ New page</a></p>
   <ul>
     {% for page in pages %}

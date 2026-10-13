@@ -42,14 +42,30 @@ CREATE TABLE IF NOT EXISTS pages (
 );
 """
 
-SCHEMA = USERS_SCHEMA + PAGES_SCHEMA
+POSTS_SCHEMA = """
+CREATE TABLE IF NOT EXISTS posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    body_md TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL CHECK (status IN ('draft', 'published')) DEFAULT 'draft',
+    author_id INTEGER REFERENCES users(id),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    published_at TEXT
+);
+"""
+
+SCHEMA = USERS_SCHEMA + PAGES_SCHEMA + POSTS_SCHEMA
 
 SLUG_PATTERN = "^[a-z0-9]+(-[a-z0-9]+)*$"
 
 # "index" is reserved: app/publish.py exports the "home" page to index.html,
 # so a page slugged "index" would silently overwrite the real homepage on
-# export.
-_RESERVED_SLUGS = frozenset({"index"})
+# export. "new" is reserved because /admin/pages/new and /admin/posts/new are
+# declared before the /{slug} routes, so an item slugged "new" could never be
+# opened for editing.
+_RESERVED_SLUGS = frozenset({"index", "new"})
 
 _PAGE_COLUMNS = "id, slug, title, body_md, status, author_id, created_at, updated_at"
 
@@ -206,6 +222,23 @@ def slug_is_valid(slug: str) -> bool:
     return slug not in _RESERVED_SLUGS and re.fullmatch(SLUG_PATTERN, slug) is not None
 
 
+# News owns these export filenames: news.html is the index and
+# news-<slug>.html is each post. A Page slugged "news" or "news-…" would write
+# to the same file, so Pages may not use them.
+NEWS_INDEX_SLUG = "news"
+NEWS_PREFIX = "news-"
+
+
+def is_news_slug(slug: str) -> bool:
+    return slug == NEWS_INDEX_SLUG or slug.startswith(NEWS_PREFIX)
+
+
+def pages_conflicting_with_news() -> list[sqlite3.Row]:
+    """Existing Pages whose slug now falls in the News namespace. Reported
+    only; nothing is renamed or deleted."""
+    return [p for p in list_pages() if is_news_slug(p["slug"])]
+
+
 def create_page(slug: str, *, title: str, body_md: str, status: str, author_id: int) -> bool:
     """Insert a new page. Returns False if the slug is already taken."""
     conn = get_connection()
@@ -226,6 +259,104 @@ def delete_page(slug: str) -> None:
     conn = get_connection()
     try:
         conn.execute("DELETE FROM pages WHERE slug = ?", (slug,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_post_by_slug(slug: str) -> sqlite3.Row | None:
+    conn = get_connection()
+    try:
+        return conn.execute("SELECT * FROM posts WHERE slug = ?", (slug,)).fetchone()
+    finally:
+        conn.close()
+
+
+def create_post(
+    slug: str, *, title: str, body_md: str, author_id: int | None,
+    created_at: str | None = None,
+) -> bool:
+    """Insert a new News post as a draft. Returns False if the slug is taken.
+
+    `created_at` ("YYYY-MM-DD HH:MM:SS") is for seed data that carries a real
+    date; the admin routes never pass it.
+    """
+    conn = get_connection()
+    try:
+        conn.execute(
+            """INSERT INTO posts (slug, title, body_md, author_id, created_at)
+               VALUES (?, ?, ?, ?, COALESCE(?, datetime('now')))""",
+            (slug, title, body_md, author_id, created_at),
+        )
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+
+def update_post(slug: str, *, title: str, body_md: str, author_id: int) -> None:
+    """Update a post's content. Status is deliberately not a parameter: only
+    set_post_status changes it, so an edit can never publish."""
+    conn = get_connection()
+    try:
+        conn.execute(
+            """UPDATE posts
+               SET title = ?, body_md = ?, author_id = ?, updated_at = datetime('now')
+               WHERE slug = ?""",
+            (title, body_md, author_id, slug),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def set_post_status(slug: str, status: str, *, published_at: str | None = None) -> None:
+    """Publishing stamps published_at (now, unless a seed passes a real date);
+    unpublishing clears it, so the public date is always when the post went live."""
+    conn = get_connection()
+    try:
+        conn.execute(
+            """UPDATE posts
+               SET status = ?, updated_at = datetime('now'),
+                   published_at = CASE WHEN ? = 'published'
+                                       THEN COALESCE(?, datetime('now')) END
+               WHERE slug = ?""",
+            (status, status, published_at, slug),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_posts() -> list[sqlite3.Row]:
+    """Newest first; id breaks ties between posts created in the same second."""
+    conn = get_connection()
+    try:
+        return conn.execute(
+            "SELECT * FROM posts ORDER BY created_at DESC, id DESC"
+        ).fetchall()
+    finally:
+        conn.close()
+
+
+def list_published_posts() -> list[sqlite3.Row]:
+    """Published posts, newest publish date first (id breaks same-second ties)."""
+    conn = get_connection()
+    try:
+        return conn.execute(
+            """SELECT * FROM posts WHERE status = 'published'
+               ORDER BY published_at DESC, id DESC"""
+        ).fetchall()
+    finally:
+        conn.close()
+
+
+def delete_post(slug: str) -> None:
+    conn = get_connection()
+    try:
+        conn.execute("DELETE FROM posts WHERE slug = ?", (slug,))
         conn.commit()
     finally:
         conn.close()

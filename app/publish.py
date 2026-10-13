@@ -1,9 +1,12 @@
 """Render the public site into site/ as plain HTML.
 
-render_site() reads only published Pages from the database (see CONTEXT.md's
-"Publish" entry — published-in-the-CMS is not the same as exported) and
-writes one file per page: the "home" slug becomes index.html, every other
-published slug becomes "<slug>.html". Two rules the rubric checks:
+render_site() reads only published Pages and News posts from the database
+(see CONTEXT.md's "Publish" entry — published-in-the-CMS is not the same as
+exported) and writes one file per item: the "home" slug becomes index.html,
+every other published slug becomes "<slug>.html", news.html is the News
+index, and each post is news-<slug>.html. Pages may not use the "news" /
+"news-" namespace (db.is_news_slug); a published Page that does makes the
+export fail rather than overwrite a News file. Two rules the rubric checks:
 
   1. Only PUBLISHED content is written here. A draft that reaches site/ is a bug.
   2. Every href and src is RELATIVE ("style.css", "menu.html"), never
@@ -31,6 +34,7 @@ main { margin-block: 2rem; }
 """
 
 HOME_SLUG = "home"
+NEWS_INDEX_FILE = f"{db.NEWS_INDEX_SLUG}.html"
 
 
 def environment() -> Environment:
@@ -46,40 +50,68 @@ def _out_name(slug: str) -> str:
 
 def render_site(out: Path | None = None) -> Path:
     out = out or settings.SITE
+    published = [p for p in db.list_pages() if p["status"] == "published"]
+    clashes = [p["slug"] for p in published if db.is_news_slug(p["slug"])]
+    if clashes:
+        # Checked before anything is touched, so a refused export leaves the
+        # previous site/ intact.
+        raise ValueError(
+            f"Published page slug(s) {clashes} collide with the News export files "
+            '("news" and "news-…" are reserved). Rename or unpublish them; '
+            "nothing was deleted."
+        )
+    posts = db.list_published_posts()
+
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
     env = environment()
     (out / "style.css").write_text(CSS)
 
-    published = [p for p in db.list_pages() if p["status"] == "published"]
-
     # Home is the entry point, not a nav link itself (see CONTEXT.md's "Pages"
     # entry); every other published page appears in the nav on every page.
     nav_links = [
         {"href": _out_name(p["slug"]), "title": p["title"]}
         for p in published if p["slug"] != HOME_SLUG
-    ]
+    ] + [{"href": NEWS_INDEX_FILE, "title": "News"}]
+    layout = {
+        "title": settings.SITE_TITLE, "css_path": "style.css",
+        "home_path": "index.html", "nav_links": nav_links,
+    }
 
     template = env.get_template("public/page.html")
-    for page in published:
-        (out / _out_name(page["slug"])).write_text(
+
+    def write_item(filename: str, item) -> None:
+        (out / filename).write_text(
             template.render(
-                title=settings.SITE_TITLE,
-                page_title=page["title"],
-                body_html=content.render_markdown(page["body_md"]),
-                css_path="style.css",
-                home_path="index.html",
-                nav_links=nav_links,
+                page_title=item["title"],
+                body_html=content.render_markdown(item["body_md"]),
+                **layout,
             )
         )
 
+    for page in published:
+        write_item(_out_name(page["slug"]), page)
+    for post in posts:
+        write_item(f"{db.NEWS_PREFIX}{post['slug']}.html", post)
+
+    (out / NEWS_INDEX_FILE).write_text(
+        env.get_template("public/news_index.html").render(
+            posts=[
+                {
+                    "href": f"{db.NEWS_PREFIX}{p['slug']}.html",
+                    "title": p["title"],
+                    "date": p["published_at"][:10],
+                }
+                for p in posts
+            ],
+            **layout,
+        )
+    )
+
     if not any(p["slug"] == HOME_SLUG for p in published):
         (out / "index.html").write_text(
-            env.get_template("public/home.html").render(
-                title=settings.SITE_TITLE, items=[], css_path="style.css",
-                home_path="index.html", nav_links=nav_links,
-            )
+            env.get_template("public/home.html").render(items=[], **layout)
         )
 
     return out

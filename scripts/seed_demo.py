@@ -99,6 +99,43 @@ PAGE_CONTENT = {
     "our-story": OUR_STORY_BODY,
 }
 
+# News. The Michelin item is the one real, dated item (CONTEXT.md, "Michelin
+# item"): the Guide's own page attributes the star to the Lomas de
+# Chapultepec address, and the article cited below is dated 24 Aug 2026, which
+# is the post's date. Everything else is invented sample content and carries a
+# visible [DEMO CONTENT] label.
+# (slug, title, created_at, status, body_md)
+NEWS_POSTS = [
+    (
+        "michelin-star",
+        "La Once Mil holds one Michelin star",
+        "2026-08-24 12:00:00",
+        "published",
+        "The MICHELIN Guide lists La Once Mil at Monte Everest 780, Lomas de "
+        "Chapultepec, with **One MICHELIN Star**, awarded at the Guide's 2026 "
+        "Mexico ceremony in Guadalajara.\n\n"
+        "Source: MICHELIN Guide, article dated 24 Aug 2026.",
+    ),
+    (
+        "seasonal-menu-update",
+        "Seasonal menu update",
+        "2026-09-01 12:00:00",
+        "published",
+        "**[DEMO CONTENT]** Invented sample announcement for the class project; "
+        "it does not come from La Once Mil.\n\n"
+        "New seasonal tacos are coming to the menu.",
+    ),
+    (
+        "holiday-hours",
+        "Holiday hours",
+        "2026-09-15 12:00:00",
+        "draft",
+        "**[DEMO CONTENT]** Invented sample draft for the class project; it does "
+        "not come from La Once Mil.\n\n"
+        "Hours may change around the holidays.",
+    ),
+]
+
 
 def main() -> int:
     admin_pw = os.environ.get("CMS_ADMIN_PASSWORD")
@@ -131,7 +168,15 @@ def main() -> int:
             )
             print(f"Seeded permanent page: {slug}")
 
-    # TODO (later tickets): seed News drafts/published items.
+    for slug, title, created_at, status, body_md in NEWS_POSTS:
+        created = db.create_post(
+            slug, title=title, body_md=body_md,
+            author_id=manager["id"], created_at=created_at,
+        )
+        if created:
+            if status == "published":
+                db.set_post_status(slug, "published", published_at=created_at)
+            print(f"Seeded News post: {slug} ({status})")
     return 0
 
 

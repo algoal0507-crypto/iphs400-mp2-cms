@@ -23,12 +23,7 @@ templates = urls.install(Jinja2Templates(directory=str(settings.TEMPLATES)))
 
 def _require_manager(request: Request):
     """(user, None) if the caller may manage pages, else (None, response)."""
-    user = auth.current_user(request)
-    if user is None:
-        return None, RedirectResponse("/login", status_code=303)
-    if user["role"] != "admin":
-        return None, PlainTextResponse("Forbidden.", status_code=403)
-    return user, None
+    return auth.require_role(request, "admin")
 
 
 @router.get("/admin/pages")
@@ -38,7 +33,8 @@ def pages_list(request: Request):
         return error
     return auth.render_with_csrf(
         templates, request, "admin/pages_list.html",
-        {"title": "Pages", "pages": db.list_pages()},
+        {"title": "Pages", "pages": db.list_pages(),
+         "news_conflicts": db.pages_conflicting_with_news()},
     )
 
 
@@ -78,6 +74,13 @@ def page_new_submit(
             templates, request, "admin/page_new.html",
             {"title": "New page", "values": values,
              "error": "Slug must be lowercase letters, numbers, and hyphens only."},
+            status_code=400,
+        )
+    if db.is_news_slug(slug):
+        return auth.render_with_csrf(
+            templates, request, "admin/page_new.html",
+            {"title": "New page", "values": values,
+             "error": 'The slug "news" and slugs starting with "news-" are reserved for News.'},
             status_code=400,
         )
 
@@ -129,6 +132,16 @@ def page_edit_submit(
         return PlainTextResponse("Invalid CSRF token.", status_code=403)
     if status not in ("draft", "published"):
         status = "draft"
+    if status == "published" and db.is_news_slug(slug):
+        page = db.get_page_by_slug(slug)
+        return auth.render_with_csrf(
+            templates, request, "admin/page_edit.html",
+            {"title": f"Edit {page['title']}", "page": page,
+             "preview_html": content.render_markdown(page["body_md"]), "saved": False,
+             "error": f'"{slug}" is in the namespace reserved for News, so this page '
+                      "cannot be published. Create a page with a different slug instead."},
+            status_code=400,
+        )
 
     db.update_page(
         slug,

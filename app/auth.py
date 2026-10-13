@@ -17,7 +17,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHash, VerificationError, VerifyMismatchError
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import PlainTextResponse, RedirectResponse, Response
 
 from app import settings
 
@@ -102,3 +102,18 @@ def render_with_csrf(templates, request: Request, template_name: str, context: d
     )
     set_csrf_cookie(response, token)
     return response
+
+
+def require_role(request: Request, *roles: str):
+    """Gate a route: (user, None) if allowed, else (None, response).
+
+    No roles means any logged-in user. An anonymous caller is redirected to
+    /login; a logged-in caller with the wrong role gets a 403. Every admin
+    route calls this, so the rule lives in one place.
+    """
+    user = current_user(request)
+    if user is None:
+        return None, RedirectResponse("/login", status_code=303)
+    if roles and user["role"] not in roles:
+        return None, PlainTextResponse("Forbidden.", status_code=403)
+    return user, None
