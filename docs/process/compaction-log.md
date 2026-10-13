@@ -17,5 +17,22 @@
 > Limits of this claim: it covers the sessions above only. Any session whose
 > transcript was not saved, or that is still in progress, is not covered.
 
+> **Update, 2026-10-13 (evidence re-checked; the 2026-09-29 statement above is kept as written).**
+>
+> - **Method.** The transcripts in `docs/transcripts/` were parsed line by line as
+>   JSON and searched for real compaction events: system messages with
+>   `subtype: compact_boundary`, `isCompactSummary` messages, and `/compact`
+>   commands. Sessions **01-09 contain none** (0 of each).
+> - **A plain text search is misleading.** Searching the raw files for the words
+>   `compact_boundary` finds 3 hits in session 07. Those are the assistant's own
+>   search commands, written while it audited for compactions, not compactions.
+> - **Context use.** `notes/usage-ledger.csv` (10 sessions, rows through
+>   2026-10-13T18:03Z) peaks at 23% context in sessions 01-09 and 45% in session 10,
+>   all below the 50% mark where the course rule starts asking for `/compact`.
+> - **Not covered.** Session 10 (`17a751d5`, the T06, T07, and T09 work on
+>   2026-10-13) has no saved transcript yet, so its absence of compaction is not
+>   confirmed from a transcript. The `PreCompact` hook has logged no rows in the
+>   table below.
+
 | UTC time | Session | Trigger | Focus note |
 |---|---|---|---|
