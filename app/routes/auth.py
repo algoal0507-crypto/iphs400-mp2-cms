@@ -35,9 +35,16 @@ def login_submit(
     if not auth.csrf_is_valid(request, csrf_token):
         return _rejected(request, "Your session expired. Please try again.", status_code=403)
 
-    user = db.get_user_by_email(email)
-    if user is None or not user["active"] or not auth.verify_password(password, user["password_hash"]):
+    user = db.get_user_by_email(email.strip().lower())
+    if user is None or not auth.verify_password(password, user["password_hash"]):
         return _rejected(request, "Invalid email or password.", status_code=401)
+    if not user["active"]:
+        # Said only after the password checks out, so it can't be used to find
+        # out which emails have accounts.
+        return _rejected(
+            request, "This account has been deactivated. Ask the Manager for access.",
+            status_code=401,
+        )
 
     response = RedirectResponse("/admin/dashboard", status_code=303)
     auth.set_session_cookie(response, user["id"])

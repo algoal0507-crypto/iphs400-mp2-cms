@@ -17,6 +17,7 @@
   {% endif %}
   <p><a href="{{ rel('/admin/content') }}">All content</a></p>
   {% if role_label == "Manager" %}
+    <p><a href="{{ rel('/admin/users') }}">Manage users</a></p>
     <p><a href="{{ rel('/admin/pages') }}">Edit permanent pages (Home, Menu, Our Story)</a></p>
   {% endif %}
   <p><a href="{{ rel('/admin/posts') }}">News posts</a></p>

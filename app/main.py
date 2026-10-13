@@ -44,11 +44,12 @@ def create_app() -> FastAPI:
             {"title": settings.SITE_TITLE, "items": []},
         )
 
-    from app.routes import admin, auth, pages, posts
+    from app.routes import admin, auth, pages, posts, users
     app.include_router(auth.router)
     app.include_router(admin.router)
     app.include_router(pages.router)
     app.include_router(posts.router)
+    app.include_router(users.router)
     return app
 
 

@@ -360,3 +360,29 @@ def delete_post(slug: str) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
+def list_users() -> list[sqlite3.Row]:
+    conn = get_connection()
+    try:
+        return conn.execute("SELECT * FROM users ORDER BY email").fetchall()
+    finally:
+        conn.close()
+
+
+def set_role(user_id: int, role: str) -> None:
+    conn = get_connection()
+    try:
+        conn.execute("UPDATE users SET role = ? WHERE id = ?", (role, user_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def set_active_by_id(user_id: int, *, active: bool) -> None:
+    conn = get_connection()
+    try:
+        conn.execute("UPDATE users SET active = ? WHERE id = ?", (int(active), user_id))
+        conn.commit()
+    finally:
+        conn.close()
