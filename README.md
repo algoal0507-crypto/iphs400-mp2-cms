@@ -76,7 +76,8 @@ The first time, turn Pages on in GitHub: **Settings → Pages → Deploy from a 
 ```text
 app/            FastAPI app: auth, routes (pages, posts, users, admin), publish, db
 templates/      Jinja templates and the one shared stylesheet (style.css)
-scripts/        seed_demo.py, check_submission.py, usage_report.py
+scripts/        seed_demo.py, check_submission.py, usage_report.py, make_web_images.sh
+assets/images/  the three site photos (originals, untouched), CREDITS.md (sources and credits), web/ (the cropped copies that `cms publish` ships)
 tests/          the test suite (route sweep for access control and CSRF in test_access_control.py)
 CONTEXT.md      the project glossary;  docs/adr/  decisions that are hard to undo
 notes/          client brief, restaurant research, field notes, token budget and usage ledger

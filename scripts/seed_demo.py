@@ -40,8 +40,6 @@ Mexico City
 Walk-ins only — no reservations, first come, first served.
 
 One MICHELIN Star, awarded 2026, attributed to this address.
-
-[PLACEHOLDER: storefront photo]
 """
 
 # The page title is the <h1> on the public page, so a body never starts with
@@ -50,6 +48,8 @@ One MICHELIN Star, awarded 2026, attributed to this address.
 # on the public page).
 MENU_BODY = """\
 Gourmet tacos that elevate traditional street-taco formats.
+
+[PHOTO: menu]
 
 ## Tacos
 
@@ -89,8 +89,6 @@ Gourmet tacos that elevate traditional street-taco formats.
 - **Sorbets**
 - **Ice creams**
 - **Meringues**
-
-[PLACEHOLDER: menu photo]
 """
 
 OUR_STORY_BODY = """\
@@ -106,7 +104,7 @@ people know as fast, inexpensive food, and elevate it with high-quality \
 ingredients — from A5 wagyu to 12-hour-cooked lechón — while keeping the \
 spirit of a taquería.
 
-[PLACEHOLDER: chef/kitchen photo]
+[PHOTO: our-story]
 """
 
 # The text these two pages shipped with before the T09 copy fix. Kept so an
@@ -175,17 +173,58 @@ PAGE_CONTENT = {
 # is the post's date. Everything else is invented sample content and carries a
 # visible [DEMO CONTENT] label.
 # (slug, title, created_at, status, body_md)
-NEWS_POSTS = [
-    (
-        "michelin-star",
-        "La Once Mil holds one Michelin star",
-        "2026-08-24 12:00:00",
-        "published",
-        "The MICHELIN Guide lists La Once Mil at Monte Everest 780, Lomas de "
-        "Chapultepec, with **One MICHELIN Star**, awarded at the Guide's 2026 "
-        "Mexico ceremony in Guadalajara.\n\n"
-        "Source: MICHELIN Guide, article dated 24 Aug 2026.",
-    ),
+# The two real News posts. A post's date in the list and on its page is when it was
+# published on THIS site (published_at, here 2026-10-13); the date of the event is in
+# the text. Sources were read on 2026-10-13: the Madrid press release is the
+# official announcement (in Spanish), and the Michelin article is dated 20 May 2026.
+MICHELIN_SOURCE = ("https://guide.michelin.com/us/en/article/michelin-guide-ceremony/"
+                   "every-michelin-starred-restaurant-in-mexico-for-2026-and-the-year-s-key-trends")
+MADRID_SOURCE = ("https://www.mateoandco.es/2026/09/14/la-once-mil-la-taqueria-que-cambio-la-manera-"
+                 "de-comer-tacos-en-cdmx-llega-a-madrid-de-la-mano-de-los-33/")
+PUBLISHED_AT = "2026-10-13 12:00:00"
+
+MICHELIN_BODY = (
+    "Michelin announced La Once Mil as a **new one-star restaurant** in its Mexico "
+    "selection on **May 20, 2026**. The Guide lists it under Mexico City.\n\n"
+    "- **Event date:** May 20, 2026, when the MICHELIN Guide Mexico 2026 selection was revealed\n"
+    f"- **Source:** [MICHELIN Guide, \"Every MICHELIN-Starred Restaurant in Mexico for 2026, "
+    f"Plus the Year's Key Trends\"]({MICHELIN_SOURCE}), dated 20 May 2026\n"
+)
+MADRID_BODY = (
+    "The official announcement of September 14, 2026 gave **September 22, 2026** as the "
+    "opening date of La Once Mil in Madrid, at **Plaza de las Salesas 11**, in "
+    "collaboration with **Los 33**, its local partner.\n\n"
+    "- **Opening date:** September 22, 2026\n"
+    "- **Address:** Plaza de las Salesas 11, Madrid\n"
+    "- **With:** Los 33\n"
+    "- **Hours announced:** Tuesday to Saturday, 1:00 pm to 1:00 am; Sunday, 1:00 pm to "
+    "7:00 pm. Dine-in only, no takeaway.\n"
+    "- **Announced:** September 14, 2026\n"
+    f"- **Source:** [Official announcement (press release, in Spanish)]({MADRID_SOURCE})\n\n"
+    "This is company news. The visiting information on Home is for the Mexico City "
+    "restaurant only.\n"
+)
+
+# What the Michelin post said before 2026-10-13. refresh_news() recognises it so an
+# existing database gets the new post in place (no duplicate) unless it was edited.
+LEGACY_MICHELIN_TITLE = "La Once Mil holds one Michelin star"
+LEGACY_MICHELIN_BODY = (
+    "The MICHELIN Guide lists La Once Mil at Monte Everest 780, Lomas de "
+    "Chapultepec, with **One MICHELIN Star**, awarded at the Guide's 2026 "
+    "Mexico ceremony in Guadalajara.\n\n"
+    "Source: MICHELIN Guide, article dated 24 Aug 2026."
+)
+LEGACY_MICHELIN_PUBLISHED_AT = "2026-08-24 12:00:00"
+
+# (slug, title, created_at, status, body_md); the list order is the id order, so with the
+# same publish time the later entry (Madrid) is listed first.
+REAL_NEWS = [
+    ("michelin-star", "La Once Mil earns its first Michelin star", PUBLISHED_AT, "published", MICHELIN_BODY),
+    ("madrid-opening", "La Once Mil arrives in Madrid", PUBLISHED_AT, "published", MADRID_BODY),
+]
+
+# Invented sample posts, always labelled as demo content (CONTEXT.md).
+DEMO_NEWS = [
     (
         "seasonal-menu-update",
         "Seasonal menu update",
@@ -205,6 +244,8 @@ NEWS_POSTS = [
         "Hours may change around the holidays.",
     ),
 ]
+
+NEWS_POSTS = REAL_NEWS + DEMO_NEWS
 
 
 # Wording decided for Our Story after review: the "first and only" claim is not in our
@@ -230,6 +271,41 @@ _WORDING_FIXES = {
 
 # A sentence that points at a project file, e.g. "... see `notes/foo.md`: ...".
 _INTERNAL_NOTE = re.compile(r" ?[^.\n]*`notes/[^`\n]*`[^.\n]*\.")
+
+
+def _drop_line(body: str, line: str) -> str:
+    """Remove every line that is exactly `line`, keeping the rest of the text as it was."""
+    kept = [l for l in body.split("\n") if l.strip() != line]
+    out = "\n".join(kept)
+    return out.rstrip("\n") + "\n" if body.endswith("\n") else out
+
+
+def _fix_home_photo(body: str) -> str:
+    # The Home photo now sits in the hero (a template), so the placeholder is dropped.
+    return _drop_line(body, "[PLACEHOLDER: storefront photo]")
+
+
+def _fix_menu_photo(body: str) -> str:
+    # Only when the old placeholder is still there, so a photo the Manager removed stays removed.
+    if "[PLACEHOLDER: menu photo]" not in body:
+        return body
+    body = _drop_line(body, "[PLACEHOLDER: menu photo]")
+    if "[PHOTO: menu]" not in body:
+        first, sep, rest = body.partition("\n\n")
+        body = f"{first}\n\n[PHOTO: menu]\n\n{rest}" if sep else f"{body.rstrip()}\n\n[PHOTO: menu]\n"
+    return body
+
+
+def _fix_story_photo(body: str) -> str:
+    if "[PLACEHOLDER: chef/kitchen photo]" not in body:
+        return body
+    body = _drop_line(body, "[PLACEHOLDER: chef/kitchen photo]")
+    # At the end, as the placeholder was: the portrait stands alone rather than sitting
+    # beside the paragraph that names people.
+    return body if "[PHOTO: our-story]" in body else f"{body.rstrip()}\n\n[PHOTO: our-story]\n"
+
+
+_PHOTO_FIXES = {"home": _fix_home_photo, "menu": _fix_menu_photo, "our-story": _fix_story_photo}
 
 
 def refresh_public_copy() -> int:
@@ -258,12 +334,52 @@ def refresh_public_copy() -> int:
                 new = re.sub(r"(?m)^### ", "## ", rest.lstrip("\n"))
         for pattern, replacement in _WORDING_FIXES.get(slug, []):
             new = pattern.sub(replacement, new)
+        if slug in _PHOTO_FIXES:
+            new = _PHOTO_FIXES[slug](new)
         if new != body:
             db.update_page(slug, title=page["title"], body_md=new,
                            status=page["status"], author_id=page["author_id"])
             print(f"Updated public copy: {slug}")
             changed += 1
     return changed
+
+
+def refresh_news() -> int:
+    """Bring an existing Michelin post up to date in place (never a duplicate).
+
+    Only a post that still says exactly what the old seed said is rewritten; one the
+    Manager has edited is left alone. Status is not touched. Returns posts changed.
+    """
+    changed = 0
+    slug, title, when, _, body = REAL_NEWS[0]
+    post = db.get_post_by_slug(slug)
+    if post and post["title"] == LEGACY_MICHELIN_TITLE and post["body_md"] == LEGACY_MICHELIN_BODY:
+        db.update_post(slug, title=title, body_md=body, author_id=post["author_id"])
+        if post["status"] == "published" and post["published_at"] == LEGACY_MICHELIN_PUBLISHED_AT:
+            db.set_post_status(slug, "published", published_at=when)
+        print(f"Updated News post: {slug}")
+        changed += 1
+    return changed
+
+
+def seed_news(items=None) -> None:
+    """Create any of `items` (default: all seed News) that do not exist yet.
+
+    A post that exists is never rewritten or re-published, except by refresh_news().
+    A post the Manager deleted is created again on the next run (as with every seed item).
+    Pass REAL_NEWS to add just the two real posts and no demo posts.
+    """
+    manager = db.get_user_by_email(DEMO_MANAGER_EMAIL)
+    for slug, title, created_at, status, body_md in (NEWS_POSTS if items is None else items):
+        created = db.create_post(
+            slug, title=title, body_md=body_md,
+            author_id=manager["id"] if manager else None, created_at=created_at,
+        )
+        if created:
+            if status == "published":
+                db.set_post_status(slug, "published", published_at=created_at)
+            print(f"Seeded News post: {slug} ({status})")
+    refresh_news()
 
 
 def main() -> int:
@@ -299,15 +415,7 @@ def main() -> int:
 
     refresh_public_copy()
 
-    for slug, title, created_at, status, body_md in NEWS_POSTS:
-        created = db.create_post(
-            slug, title=title, body_md=body_md,
-            author_id=manager["id"], created_at=created_at,
-        )
-        if created:
-            if status == "published":
-                db.set_post_status(slug, "published", published_at=created_at)
-            print(f"Seeded News post: {slug} ({status})")
+    seed_news()
     return 0
 
 

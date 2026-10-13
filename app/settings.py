@@ -7,6 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = ROOT / "templates"
 SITE = ROOT / "site"
+ASSETS = ROOT / "assets"  # assets/images/web/ is copied into site/images/ by `cms publish`
+INSTAGRAM_URL = "https://www.instagram.com/tacoslaoncemil/"
 
 SECRET_KEY = os.environ.get("CMS_SECRET_KEY", "dev-only-not-for-production")
 DATABASE_PATH = Path(os.environ.get("CMS_DATABASE", ROOT / "cms.db"))

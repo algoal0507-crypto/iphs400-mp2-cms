@@ -5,10 +5,16 @@
 {% block title %}{{ page_title }} — {{ title }}{% endblock %}
 {% block content %}
   <section class="hero">
-    <p class="eyebrow">Lomas de Chapultepec · Mexico City</p>
-    <h1>{{ title }}</h1>
-    <p class="lede">A Michelin-starred taquería. Walk in, no reservations: first come, first served.</p>
-    <hr class="rule">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <p class="eyebrow">Lomas de Chapultepec · Mexico City</p>
+        <h1>{{ title }}</h1>
+        <p class="lede">A Michelin-starred taquería. Walk in, no reservations: first come, first served.</p>
+        {% if instagram_url %}<p class="hero-actions"><a class="btn btn-secondary" href="{{ instagram_url }}" rel="noopener noreferrer">Follow on Instagram</a></p>{% endif %}
+        <hr class="rule">
+      </div>
+      {% if hero_photo %}{{ hero_photo | safe }}{% endif %}
+    </div>
   </section>
 
   <section class="visit">{{ body_html | safe }}</section>

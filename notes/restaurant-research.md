@@ -35,6 +35,27 @@ and the same Instagram account:
 (Monte Everest 780 — the Michelin-starred location). Roma Norte and Madrid are out of scope;
 their details must never appear on this site.
 
+**Scope change (2026-10-13, approved by the project author):** Madrid is now allowed as
+**company news only**: one News post about the opening, with sources. Madrid is still not a
+visiting location on this site (Home's visiting information, the Menu, and Our Story stay on
+Mexico City). Roma Norte is unchanged: out of scope.
+
+**Madrid details re-read on 2026-10-13 from the official announcement** (the Mateo & Co press
+release dated 14 Sep 2026, in Spanish,
+<https://www.mateoandco.es/2026/09/14/la-once-mil-la-taqueria-que-cambio-la-manera-de-comer-tacos-en-cdmx-llega-a-madrid-de-la-mano-de-los-33/>):
+opening **22 September 2026** at **Plaza de las Salesas 11**, Madrid, with **Los 33**;
+hours Tuesday to Saturday 13:00 to 01:00 and Sunday 13:00 to 19:00; dine-in only, no
+takeaway. These hours **differ** from the "Tue–Sun 1:00 PM–11:00 PM" in the secondary
+sources in the table below; the official announcement is the more authoritative source, and
+the post uses it. The post says the date "was given" as the opening date, because only the
+announcement was read, not a report that the opening happened.
+
+**Michelin date re-read on 2026-10-13:** the Michelin article
+<https://guide.michelin.com/us/en/article/michelin-guide-ceremony/every-michelin-starred-restaurant-in-mexico-for-2026-and-the-year-s-key-trends>
+is dated 20 May 2026 and says the selection was revealed on May 20, 2026; it lists
+"Mexico City: La Once Mil" among the one-star restaurants, marked NEW. The post says "its
+first Michelin star" and never "the first taquería ever".
+
 ## Verified facts
 
 | Fact | Detail | Source |
@@ -83,6 +104,11 @@ their details must never appear on this site.
   from.
 
 ## Photos — status, not yet resolved
+
+> **Update 2026-10-13:** the author later supplied three photos (a tray of tacos, one taco, a
+> portrait) and they are now on the site. Their source, post date, credit, and permission are
+> **not recorded**; see `assets/images/CREDITS.md`. The notes below are the original
+> 2026-09-29 status and are kept as written.
 
 I was not able to retrieve or download actual restaurant photographs in this session:
 - Instagram (`@tacoslaoncemil`) requires a login to view/scroll the photo grid; the browse

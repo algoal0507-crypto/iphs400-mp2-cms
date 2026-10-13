@@ -94,8 +94,20 @@ a:hover { color: var(--burgundy-dark); }
 .page-menu .page-body h2 {
   margin-top: 3rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--burgundy); letter-spacing: 0.02em;
 }
-.page-menu .page-body > p:first-child,
-.page-our-story .page-body > p:first-child { font-size: 1.15rem; color: var(--muted); }
+.page-menu .page-body > p:first-of-type,
+.page-our-story .page-body > p:first-of-type { font-size: 1.15rem; color: var(--muted); }
+
+/* Photos: responsive <img> with its size reserved, never stretched. */
+.photo { margin: 2rem 0; padding: 0; }
+.photo img { display: block; width: 100%; height: auto; border-radius: var(--radius); background: var(--ivory-deep); }
+.photo figcaption { color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; }
+.hero .photo { margin: 0; max-width: 30rem; justify-self: center; width: 100%; }
+.page-menu .photo { margin-top: 0.5rem; margin-bottom: 1rem; }
+.page-our-story .photo-our-story { max-width: 24rem; margin-top: 2rem; }
+.post-meta { color: var(--muted); font-size: 0.95rem; margin: -0.5rem 0 1.5rem; }
+.footer-links { white-space: nowrap; }
+.footer-links::before { content: "· "; }
+.site-footer a { color: var(--burgundy); }
 
 /* Placeholder for a photo we do not have rights to yet. */
 .placeholder {
@@ -110,6 +122,21 @@ a:hover { color: var(--burgundy-dark); }
 /* ---------- Public: home ---------- */
 
 .hero { text-align: center; padding-block: clamp(2.5rem, 8vw, 5.5rem) clamp(2rem, 5vw, 3.5rem); }
+.hero-actions { margin: 1.5rem 0 0; }
+/* With a photo the hero is two columns on wide screens (text left, photo right) and
+   stacks on phones with the text first. Without one it stays centred as before. */
+.hero-grid { display: grid; gap: 2rem; }
+.hero-grid:has(.photo) .hero-text { text-align: left; }
+.hero-grid:has(.photo) .lede { margin-inline: 0; }
+.hero-grid:has(.photo) .rule { margin-left: 0; }
+@media (min-width: 56rem) {
+  .hero-grid:has(.photo) { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+  .hero-grid:has(.photo) .hero-text h1 { font-size: clamp(3rem, 6vw, 4.75rem); }
+}
+@media (max-width: 55.99rem) {
+  .hero-grid:has(.photo) .hero-text { text-align: center; }
+  .hero-grid:has(.photo) .lede, .hero-grid:has(.photo) .rule { margin-inline: auto; }
+}
 .hero .eyebrow {
   color: var(--burgundy); font-size: 0.85rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem;
 }

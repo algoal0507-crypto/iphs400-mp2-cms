@@ -57,10 +57,16 @@ def test_placeholders_render_as_labelled_blocks(site):
     assert re.search(r'class="placeholder"[^>]*>\s*(<[^>]+>\s*)*PLACEHOLDER: storefront photo', html)
 
 
-def test_no_images_are_shipped(site):
-    assert not [p for p in site.rglob("*") if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}]
+def test_only_the_registered_web_photos_are_shipped(site):
+    """Photos are allowed now (see tests/test_photos_news.py); this guards that nothing
+    else is: no originals, no other formats, and every <img> is one of ours."""
+    from app.publish import PHOTOS
+    shipped = {p.name for p in site.rglob("*") if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}}
+    expected = {f"{ph.stem}-{w}.jpg" for ph in PHOTOS.values() for w in ph.widths}
+    assert shipped == expected
     for page in site.glob("*.html"):
-        assert "<img" not in page.read_text()
+        for tag in re.findall(r"<img\b[^>]*>", page.read_text()):
+            assert 'src="images/' in tag and 'alt="' in tag, tag
 
 
 def test_pages_load_nothing_from_other_sites(site):
@@ -150,4 +156,5 @@ def test_placeholder_markup_cannot_smuggle_html(tmp_path):
     db.update_page("home", title="Home", body_md="[PLACEHOLDER: <img src=x onerror=alert(1)>]",
                    status="published", author_id=None)
     html = (render_site(tmp_path / "site") / "index.html").read_text()
-    assert "<img" not in html  # the tag stays escaped text inside the caption
+    assert not re.search(r"<img[^>]*(src=x|onerror)", html)  # no live tag or event attribute
+    assert "&lt;img src=x onerror=alert(1)&gt;" in html       # it stays escaped text in the caption

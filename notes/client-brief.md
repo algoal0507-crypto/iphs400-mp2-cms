@@ -13,7 +13,7 @@ something specific to say instead of generic restaurant copy.
 **Scope note:** this project models only the flagship location — Monte Everest 780, Lomas
 de Chapultepec — the Michelin-starred address. The restaurant also operates a second Mexico
 City branch (Roma Norte) and, as of very recently (Sept 2026), a Madrid location; both are
-explicitly out of scope. See `notes/restaurant-research.md` for full sourcing and the
+explicitly out of scope (**scope change 2026-10-13:** Madrid is now allowed as *company news* only, see "Confirmed decisions" below; Roma Norte stays out). See `notes/restaurant-research.md` for full sourcing and the
 naming decision (site uses "La Once Mil," the restaurant's own verified branding; an
 earlier draft of this brief used "Tacos La Oncemil," which was corrected on 2026-09-28).
 
@@ -99,21 +99,33 @@ posted it.
   photo]`) so nothing blocks on photo access. See "Image tracker" below for what's
   still needed before final.
 
-## Image tracker (placeholders in use until these are supplied)
+- **Madrid is allowed as company news only (2026-10-13).** The Manager approved covering
+  the Madrid opening as a News post (September 22, 2026, Plaza de las Salesas 11, in
+  collaboration with Los 33, from the official announcement of September 14, 2026). It
+  stays out of Home's visiting information, the Menu, and Our Story, which cover the Mexico
+  City restaurant only. The Michelin post is worded "its first Michelin star", never "the
+  first taquería ever". Roma Norte is still out of scope. Home also gets a "Follow on
+  Instagram" button and the footer an Instagram link (`@tacoslaoncemil`).
 
-Status as of T09 (2026-10-13): **no photo is cleared, so none is on the site.** Pages show
-a labelled placeholder block instead (the `[PLACEHOLDER: ...]` line in the page's Markdown is
-rendered as a dashed photo-shaped box). Nothing is generated or taken from stock.
+## Image tracker (three photos supplied 2026-10-13; sources and permissions not recorded)
+
+Update 2026-10-13: earlier the same day this section said no photo was available and every
+page used a labelled placeholder. The author then supplied three photos in
+`assets/images/`; they now appear on the site. **Where each came from and whether anyone
+gave permission is not recorded** (they are phone screenshots; see
+`assets/images/CREDITS.md`, which also lists the crops and what is still to be filled in).
+Nothing is generated or taken from stock, and no one in the photos is identified.
 
 | Needed for | Status | Notes |
 |---|---|---|
-| Homepage hero image | **Missing** | Storefront or signature dish shot, Lomas de Chapultepec location only. Candidate: Michelin article ribeye taco / sidewalk seating (not cleared, see below). Needs user's own Instagram pull or photo. |
-| Menu page image(s) | **Missing** | Food shots; no prices, per pricing caveat. Candidate: Michelin article wagyu taco (not cleared). |
-| Our Story image | **Missing** | Chef/kitchen or storefront shot. No candidate found. |
+| Homepage hero image | **In place (source and permission not recorded)** | `IMG_8489.jpg`: a person holding a tray of tacos. Used beside the introduction. |
+| Menu page image | **In place (source and permission not recorded)** | `IMG_8452.jpg`: one beef taco. Used above the dish sections. |
+| Our Story image | **In place (source and permission not recorded)** | `portrait.png`: a portrait; the subject is **not identified** and the caption says so. |
 | News/announcement images (optional, per post) | Not needed yet | Only if a specific post needs one |
 
-When a photo arrives, record here: file, post URL and date, caption/credit, what it shows,
-and that it is the Lomas de Chapultepec location.
+Still to record, per photo: post URL and date, caption/credit, and the permission, in
+`assets/images/CREDITS.md`. If permission cannot be confirmed, remove the photo (the page
+falls back to a labelled placeholder).
 
 Per `notes/restaurant-research.md`: the three photos found in the Michelin article are
 credited "© La Once Mil" (editorial credit, not a republishing license) and are **not

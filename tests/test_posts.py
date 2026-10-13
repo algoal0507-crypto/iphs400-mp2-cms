@@ -299,15 +299,16 @@ def _run_seed(monkeypatch):
     assert module.main() == 0
 
 
-def test_seed_publishes_a_dated_michelin_item_and_labels_demo_news(tmp_path, monkeypatch):
+def test_seed_publishes_the_michelin_item_and_labels_demo_news(tmp_path, monkeypatch):
     _run_seed(monkeypatch)
     out = render_site(tmp_path / "site")
     index = (out / "news.html").read_text()
-    assert "Michelin" in index and "2026-08-24" in index
+    assert "Michelin" in index and "2026-10-13" in index  # listed by when it was published here
     michelin = next(out.glob("news-*michelin*.html")).read_text()
-    assert "Lomas de Chapultepec" in michelin
+    assert "May 20, 2026" in michelin  # the event date is in the text, separate from the post date
     assert "[DEMO CONTENT]" not in michelin  # the real item is not labelled demo
-    demo_pages = [p.read_text() for p in out.glob("news-*.html") if "michelin" not in p.name]
+    demo_pages = [p.read_text() for p in out.glob("news-*.html")
+                  if "michelin" not in p.name and "madrid" not in p.name]
     assert demo_pages and all("[DEMO CONTENT]" in html for html in demo_pages)
 
 
