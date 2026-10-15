@@ -119,3 +119,27 @@ same effort (`medium`) and provider (`anthropic`). Models: `Sonnet 5` in session
   **unconfirmed**.
 - **Plan vs actual in one line:** forecast 8% per `/implement` ticket plus 3% for its
   review; actual average over T04-T07 about 5% per ticket for both together.
+
+## Correction 2026-10-15: ledger snapshot through 2026-10-14T13:51Z (still DRAFT)
+
+The 2026-10-13 update above was right for the rows it used (up to 18:03Z) but is now
+out of date, and two of its figures should not be reused:
+
+| Figure | 2026-10-13 update | Ledger now (`scripts/usage_report.py`, rows through 2026-10-14T13:51:20Z) |
+|---|---|---|
+| Whole project, 5-hour windows | about 87 points | **100 points** (13 + 3 + 10 + 21 + 5 + 2 + 5 + 22 + 3 + 16) |
+| Whole project, weekly cap | about 11% | **14%** |
+| Average weekly cost per ticket | 1.0% | **1.3%** (9 tickets) |
+| T07 | 9% of a window | **22%** by label, but see below |
+| T04 to T07 together | 21% | **34%** by label (5 + 2 + 5 + 22); 16% if T07 counts only to its close |
+
+**Why T07 reads high.** The phase file stayed on `T07` after the ticket closed
+(2026-10-13T17:42Z), so everything done afterwards in that session was labelled T07:
+README and screenshot work, transcript commits, the photo and News follow-up. The four
+ledger rows up to 17:45:58Z add up to 4% of a window and 0% weekly. The 22% is
+therefore an upper bound for the ticket and includes non-ticket work; it cannot be
+split further from this ledger. From 2026-10-15 the phase file reads `submission-prep`.
+
+**Forecast vs actual, restated.** Forecast for T04 to T07: about 45% of one window.
+Actual: 34% by label, or 16% with T07 cut at its close. Either way it is under the
+forecast; the earlier line "about twice too high" only holds for the ticket-only reading. The weekly estimate (about 5%, worst case 10%) held: by label T04 to T07 cost 0 + 0 + 1 + 4 = 5% of the weekly cap, which includes the non-ticket work logged under T07.
