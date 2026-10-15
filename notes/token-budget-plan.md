@@ -2,7 +2,7 @@
 
 (Part 5.4 of the manual.)
 
-> **STATUS: DRAFT, written 2026-10-12, updated 2026-10-13 with actual numbers for T01-T09
+> **STATUS: DRAFT, started 2026-09-29 (actuals only, commit `b12fd83`), estimates written 2026-10-12, updated 2026-10-13 with actual numbers for T01-T09
 > (new section below), still awaiting Alejandro's review.**
 > **This plan was written AFTER T01–T03 and T08 were built, not before the first
 > ticket as the manual asks.** It is not a pre-implementation plan and must not be

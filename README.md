@@ -19,7 +19,7 @@ Publishing a post in the admin console does not by itself update this URL.
 ## Run locally
 
 Needs `git` and [`uv`](https://docs.astral.sh/uv/) (it installs the dependencies and a matching Python).
-These exact steps were run in a fresh clone on 2026-10-13.
+These exact steps were run in a fresh clone, with a clean environment, on 2026-10-15.
 
 ```bash
 git clone https://github.com/algoal0507-crypto/iphs400-mp2-cms.git
@@ -28,21 +28,20 @@ uv sync
 cp .env.example .env
 ```
 
-`uv run` does **not** read `.env` by itself, so every command below passes
-`--env-file .env`. Edit `.env` first if you want other passwords; the values in
-`.env.example` are public placeholders. A value with spaces (the site title) must stay
-in quotes or the file cannot be read.
+The app loads `.env` itself, so plain `uv run` commands work. Edit `.env` first if you
+want other passwords; the values in `.env.example` are public placeholders. A value with
+spaces (the site title) must stay in quotes.
 
 **Seed the demo data** (two users, three pages, three News posts; safe to run twice):
 
 ```bash
-uv run --env-file .env python scripts/seed_demo.py
+uv run python scripts/seed_demo.py
 ```
 
 **Start the admin console:**
 
 ```bash
-uv run --env-file .env cms serve
+uv run cms serve
 ```
 
 Open <http://localhost:8000/login>. Stop it with `Ctrl+C`.
@@ -61,9 +60,9 @@ uv run pytest
 ## Publish and deploy
 
 ```bash
-uv run --env-file .env cms publish     # writes site/ from the published content
+uv run cms publish     # writes site/ from the published content
 python3 -m http.server -d site 8001    # optional: preview at http://localhost:8001
-uv run --env-file .env cms deploy      # pushes site/ to the gh-pages branch
+uv run cms deploy      # pushes site/ to the gh-pages branch
 ```
 
 `cms publish` writes only published pages and posts, with relative links only, and
@@ -89,22 +88,17 @@ nine `ticket` issues, each with a code-review comment before it closed) and in `
 
 ## Generative AI Use Statement
 
-> **DRAFT, written 2026-10-13 from the saved transcripts, the usage ledger, and the
-> GitHub issue record. Awaiting the author's review. Anything not recorded in the repo
-> is marked "unknown" rather than guessed.**
-
 **Models and tools.**
 
 - **Claude Code** (Anthropic) did the planning and the coding. The saved transcripts
   record the model as `claude-sonnet-5` for sessions 01–06 and `claude-sonnet-5-5` for
-  sessions 07–09; session 10 (not yet saved) is logged as Sonnet 5.5 in the usage ledger.
+  sessions 07–09; the final submission-prep session (not saved as a transcript) is logged as Sonnet 5.5 in the usage ledger.
   The ledger records effort as `medium` for every row. Whether other models or effort
   levels were used for sub-agents: **unknown, not recorded**.
-- **ChatGPT** (OpenAI) was also used by the author. The author reports using it to help
-  write and tidy the longer prompts that were pasted into Claude Code (several user
-  prompts in the transcripts arrive as pasted blocks). **Model, version, dates, and
-  which prompts it helped with: unknown, not recorded in this repo; no ChatGPT
-  conversation is saved here.** [AUTHOR TO CONFIRM OR CORRECT]
+- **ChatGPT** (OpenAI) was also used, by my own account. I used it to understand the
+  assignment, prepare prompts for Claude Code, troubleshoot, review content, and draft
+  the report, which I then edited. The model, version and dates are not recorded, and
+  no ChatGPT conversation is saved in this repo.
 - **Skills** (mattpocock/skills, run inside Claude Code): `/setup-matt-pocock-skills`,
   `/ask-matt`, `/wait-what`, `/grill-with-docs`, `/to-spec`, `/to-tickets`,
   `/implement`, `/tdd`, `/code-review`. Also the `/learn` skill, the built-in `/model` and `/clear`
@@ -139,6 +133,6 @@ a "first — and so far only" claim that appeared in no source.
 | Provider | Models | Used for | Evidence |
 |---|---|---|---|
 | Anthropic (Claude Code, Pro plan) | `claude-sonnet-5`, `claude-sonnet-5-5` | all planning, coding, and code review | `provider` column is `anthropic` on every ledger row; no `Backend:` trailer on any commit |
-| OpenAI ChatGPT | unknown | prompt drafting only; not a Claude Code backend | author-reported; not recorded in the repo |
+| OpenAI ChatGPT | unknown | understanding the assignment, prompt drafting, troubleshooting, content review, report drafting; not a Claude Code backend | author-reported; not recorded in the repo |
 
 No backup provider was used as a Claude Code backend.

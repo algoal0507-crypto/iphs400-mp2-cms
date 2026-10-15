@@ -18,7 +18,9 @@ unknown it says **not recorded**; nothing here claims a permission that was not 
   their edges (a sound icon on `IMG_8452.jpg`, a round control on `IMG_8489.jpg`, a scroll
   handle on `portrait.png`), which is consistent with a capture from a social-media app.
   That is an observation, not a confirmed source.
-- **Not recorded:** the app or account, the post URL, the post date, the caption, and
+- **Source (author's statement, 2026-10-15):** I found the photos on Instagram and supplied
+  screenshots of them.
+- **Not recorded:** which Instagram account or post, the post URL, the post date, the caption, and
   the photographer's name or credit line. The author should add them below.
 - **Permission: not recorded.** Nothing in the repo shows that La Once Mil or any
   photographer gave permission to republish these photos. The author directed their use
