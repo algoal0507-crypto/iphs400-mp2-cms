@@ -87,3 +87,5 @@ ts,session,phase,provider,model,effort,ctx_pct,five_h_pct,weekly_pct
 2026-10-14T13:51:20Z,17a751d5,T07,anthropic,Sonnet 5.5,medium,69.0,0,10
 2026-10-15T06:28:25Z,17a751d5,submission-prep,anthropic,Sonnet 5.5,medium,11.0,4,12
 2026-10-15T18:02:52Z,0aaeae1a,submission-prep,anthropic,Sonnet 5.5,medium,15.0,4,13
+2026-10-15T18:29:37Z,0aaeae1a,submission-prep,anthropic,Sonnet 5.5,medium,17.0,5,13
+2026-10-15T18:58:23Z,0aaeae1a,submission-prep,anthropic,Sonnet 5.5,medium,18.0,6,13

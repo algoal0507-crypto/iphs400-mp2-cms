@@ -2,9 +2,9 @@
 
 (Part 2 of the manual: at least five things you noticed inside WordPress Playground, in your own words.)
 
-> **STATUS: UNFINISHED — 3 of the required 5 observations recorded (2026-09-29).**
-> Only things Alejandro actually did and reported are written below. Do not add
-> observations he has not made. Rubric item S1.1 needs at least five.
+> **STATUS: 5 of the required 5 observations recorded (observations 1-3 on 2026-09-29,
+> 4-5 supplied by Alejandro on 2026-10-15).** Only things Alejandro actually did and
+> reported are written below.
 
 ## Recorded observations (from what Alejandro tried in WordPress Playground)
 
@@ -17,15 +17,14 @@
 3. **Pages and posts show up in different places.** I also created an About page.
    About appears in the navigation menu, while my post appears in the blog.
 
-## Not yet done (do these in WordPress Playground, then write what you saw)
+4. **Easy to navigate.** WordPress was easy to navigate. The interface guided me, and I
+   could understand how things worked without needing instructions. There were
+   different elements I could add to make the page my own.
+5. **Templates make design choices easier.** I liked having creative templates to choose
+   from. Sometimes it is difficult to think of a design from scratch, so seeing
+   different options makes it easier to decide what I want.
 
-4. **UNFINISHED — Settings → Permalinks.** How is the URL for the post built, and
-   which part comes from the title? (This is the slug.) *Question asked; no answer
-   yet.*
-5. **UNFINISHED — Editor role.** Users → Add New with the **Editor** role; log out,
-   log in as that user; try to reach **Users**. Write down exactly what happens.
-6. **UNFINISHED — Status filter.** Find where Posts → All Posts filters by status.
-   That screen is the content list the CMS will build.
+## Not covered
 
-Any two of 4–6 would bring the total to five. Anything else surprising, hidden, or
-slow that you notice is also valid, in your own words.
+I did not record anything about Settings → Permalinks (how the slug is built from the
+title), the Editor role trying to reach Users, or the Posts → All Posts status filter.

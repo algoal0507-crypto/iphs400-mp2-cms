@@ -11,8 +11,9 @@ site exported as plain HTML to GitHub Pages. All seven required capabilities wor
 with argon2 hashes, a Manager and an Editor role, News posts, Pages, a dashboard with a
 filterable content list and Markdown preview, user management, and `cms publish` /
 `cms deploy`. Nine tickets (#2 to #10) are closed, each with a code-review comment posted
-before it closed. The suite has 361 passing tests, and I checked the 12 admin screenshots
-(six screens at 1280 and 390 px) against a fresh clone.
+before it closed. The suite has 361 passing tests. Claude Code, not me, re-ran the suite and
+re-captured the 12 admin screenshots (six screens at 1280 and 390 px) on a fresh clone to
+check them.
 
 Decisions that were mine (grill session 03, transcript line 186 unless noted):
 
@@ -28,8 +29,9 @@ Decisions that were mine (grill session 03, transcript line 186 unless noted):
   screenshots. Their post URLs and permission are not recorded
   (`assets/images/CREDITS.md`), so I cannot claim they are cleared for reuse.
 
-**What is not finished.** My WordPress field notes have 3 of the 5 required observations
-(`notes/cms-field-notes.md` says so). The token budget plan came late: it was started on
+**What is not finished.** My WordPress field notes have the 5 required observations
+(`notes/cms-field-notes.md`), but none on permalinks, the Editor role or the status
+filter. The token budget plan came late: it was started on
 2026-09-29 (commit `b12fd83`, actual usage only) and its estimates were written on
 2026-10-12, after T01 to T03 and T08, not before the first ticket. There is no verified
 phone number, so Home has no Call button.
@@ -51,8 +53,8 @@ phone number, so Home has no Call button.
    first taquería ever". The same review flagged it and I had the sentence replaced.
 4. **A "verified" claim that was wrong.** The AI reported the live screenshots as checked,
    but the headless browser had served a cached page, so the Our Story image still showed
-   the old sentence. I noticed only when I opened the image. The correction is a comment
-   on #10 (2026-10-13).
+   the old sentence. Claude caught this itself, when it actually opened the image, and
+   posted the correction as a comment on #10 (2026-10-13); I did not spot it.
 ## 3. Skills, prompts, and resources
 
 - **Skills:** `/grill-with-docs` to get decisions out of me one question at a time and
@@ -74,12 +76,14 @@ phone number, so Home has no Call button.
 ## 4. What next, and what the budget data said
 
 **Budget** (`notes/usage-ledger.csv` through 2026-10-14T13:51Z, run through
-`scripts/usage_report.py`; later rows are `submission-prep` and add 0%): about **100
+`scripts/usage_report.py`; the `submission-prep` rows after that add about 1% of a window
+and 1% weekly so far): about **100
 percentage points** of 5-hour windows, **14%** of the weekly cap, and **1.3% of the
 weekly cap per ticket** over 9 tickets. I forecast T04 to T07 at about 45% of a window.
-By phase label they used 34% (T04 5, T05 2, T06 5, T07 22), but the T07 label is
-inflated: the phase file stayed on T07 after that ticket closed, so later README,
-screenshot and photo work was logged there. Counted only to its close, T07 is about 16%.
+The four tickets together used 34% by phase label (T04 5, T05 2, T06 5, T07 22), but
+the T07 label alone (22%) is inflated: the phase file stayed on T07 after that ticket
+closed, so later README, screenshot and photo work was logged there. Counted only to
+T07's close, T07 is about 4% and T04 to T07 together about 16% (5 + 2 + 5 + 4).
 I did not forecast T09 (visual design) at all; it took 16%. The plan was late, so it is a record, not a forecast I made
 in advance.
 
